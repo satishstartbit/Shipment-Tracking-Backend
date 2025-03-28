@@ -4,15 +4,18 @@ const Schema = mongoose.Schema;
 const transportComapnySchema = new Schema({
     company_name: {
         type: String,
-        required: true
+        required: true,
+        unique: true
     },
-    company_address: {
+    city: {
         type: String,
         required: true
     },
-    company_contact: {
+    state: {
         type: String,
-        required: true
+    },
+    country: {
+        type: String,
     },
     munshiId: {
         type: Schema.Types.ObjectId,

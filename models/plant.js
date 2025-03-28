@@ -4,7 +4,8 @@ const Schema = mongoose.Schema;
 const plantSchema = new Schema({
     name: {
         type: String,
-        required: true
+        required: true,
+        unique: true
     },
     city: {
         type: String,
