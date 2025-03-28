@@ -35,9 +35,16 @@ app.use("/api/role", roleRoutes);
 app.use("/api/company", companyRoutes);
 
 
-app.use("/", MobileRoutes)
+app.use("/mobile", MobileRoutes)
 
 
+app.get('/', (req, res) => {
+    res.send('Hello, World!');
+});
+
+app.get('/api/data', (req, res) => {
+    res.json({ message: "This is a sample API response" });
+});
 
 
 app.use((error, req, res, next) => {
