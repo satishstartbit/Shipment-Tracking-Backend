@@ -14,9 +14,10 @@ const MobileRoutes = require("./routes/nativeapp/userRoutes");
 const app = express();
 
 const PORT = process.env.PORT || 3000;
-const DB_URL = process.env.DATABASE_URL;
+const DB_URL = "mongodb+srv://satish:Root123@shipmenttacking.ndlbj.mongodb.net/Shipment_tracking?retryWrites=true&w=majority&appName=ShipmentTacking"
 
-
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
 mongoose
     .connect(DB_URL)
@@ -28,18 +29,17 @@ mongoose
     });
 
 
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
 
-app.use((req, res, next) => {
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader(
-        "Access-Control-Allow-Methods",
-        "OPTIONS, GET, POST, PUT, PATCH, DELETE"
-    );
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-    next();
-});
+
+// app.use((req, res, next) => {
+//     res.setHeader("Access-Control-Allow-Origin", "*");
+//     res.setHeader(
+//         "Access-Control-Allow-Methods",
+//         "OPTIONS, GET, POST, PUT, PATCH, DELETE"
+//     );
+//     res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+//     next();
+// });
 
 app.use("/api/users", userRoutes);
 app.use("/api/role", roleRoutes);
@@ -58,13 +58,13 @@ app.get('/api/data', (req, res) => {
 });
 
 
-app.use((error, req, res, next) => {
-    console.error(error);
-    res.status(error.statusCode || 500).json({
-        message: error.message || "An unexpected error occurred",
-        data: error.data || null,
-    });
-});
+// app.use((error, req, res, next) => {
+//     console.error(error);
+//     res.status(error.statusCode || 500).json({
+//         message: error.message || "An unexpected error occurred",
+//         data: error.data || null,
+//     });
+// });
 
 
 app.listen(PORT, () => {
