@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-     "dev": "vercel dev"
+    "dev": "vercel dev"
   },
   "keywords": [],
   "author": "",
@@ -17,9 +17,11 @@
     "body-parser": "^1.20.3",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "install": "^0.13.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.12.2",
-    "nodemon": "^3.1.9"
+    "mongoose": "^8.13.0",
+    "nodemon": "^3.1.9",
+    "npm": "^11.2.0"
   },
   "devDependencies": {
     "@vercel/node": "^2.0.0"
