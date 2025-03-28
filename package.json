@@ -2,9 +2,9 @@
   "name": "tms-backend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "node server.js",
      "dev": "vercel dev"
   },
   "keywords": [],
@@ -20,5 +20,11 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.12.2",
     "nodemon": "^3.1.9"
+  },
+  "devDependencies": {
+    "@vercel/node": "^2.0.0"
+  },
+  "engines": {
+    "node": "18.x"
   }
 }
