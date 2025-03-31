@@ -1,6 +1,6 @@
 
-const Users = require('../../../models/user');
-const TransportCompany = require('../../../models/transportCompany');
+const Users = require('../models/user');
+const TransportCompany = require('../models/transportCompany');
 
 const registerTransportCompany = async (req, res, next) => {
 

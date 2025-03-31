@@ -1,5 +1,5 @@
 const express = require('express');
-const { UserLogin, UserLogout } = require('../../controllers/native_app/user/user');
+const { UserLogin, UserLogout } = require('../controllers/MobileUser');
 
 
 const router = express.Router();

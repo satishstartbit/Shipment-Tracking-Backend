@@ -1,6 +1,6 @@
 const express = require('express');
-const { registerUser, getUserById, getAllUsers, deleteUserById } = require('../../controllers/webportal/user/CreateUsers');
-const { loginUser, refreshAccessToken } = require('../../controllers/webportal/user/authController');
+const { registerUser, getUserById, getAllUsers, deleteUserById } = require('../controllers/AdminCreateUsers');
+const { loginUser, refreshAccessToken } = require('../controllers/AdminAuthController');
 
 const router = express.Router();
 

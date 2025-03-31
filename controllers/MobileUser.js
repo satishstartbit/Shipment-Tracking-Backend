@@ -1,5 +1,5 @@
-const Users = require('../../../models/user');
-const Session = require('../../../models/session');
+const Users = require('../models/user');
+const Session = require('../models/session');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 

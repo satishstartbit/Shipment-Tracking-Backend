@@ -4,8 +4,10 @@ const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 require("dotenv").config();
 
-
-const MobileRoutes = require("./routes/nativeapp/userRoutes");
+const userRoutes = require("./routes/AdminuserRoutes"); // Your user routes
+const MobileRoutes = require("./routes/MobileUserRoutes");
+const companyRoutes = require("./routes/AdmincompanyRoutes"); // Your user routes
+const roleRoutes = require("./routes/roleRoutes"); // Your user routes
 
 
 
@@ -28,7 +30,9 @@ app.use((req, res, next) => {
     next();
 });
 
-
+app.use("/api/role", roleRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/company", companyRoutes);
 app.use("/mobile", MobileRoutes)
 
 

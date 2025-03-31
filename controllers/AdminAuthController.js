@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
-const Users = require('../../../models/user');
-const { generateJWT } = require('../../../utils/generateJWT');
-const { generateRefreshToken } = require('../../../utils/generateRefreshToken');
+const Users = require('../models/user');
+const { generateJWT } = require('../utils/generateJWT');
+const { generateRefreshToken } = require('../utils/generateRefreshToken');
 
 // Controller to login the user and return both access and refresh tokens
 const loginUser = async (req, res) => {

@@ -1,6 +1,7 @@
 // routes/userRoutes.js
 const express = require('express');
-const { registerTransportCompany, getTransportCompanyById, getAllTransportCompany, deleteTransportCompanyById } = require('../../controllers/webportal/company/company');
+const { registerTransportCompany, getTransportCompanyById, 
+    getAllTransportCompany, deleteTransportCompanyById } = require('../controllers/AdminCompany');
 const router = express.Router();
 // GET route to fetch all users
 

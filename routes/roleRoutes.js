@@ -1,6 +1,6 @@
 // routes/userRoutes.js
 const express = require('express');
-const { getAllRoles } = require('../../controllers/webportal/user/Roles');
+const { getAllRoles } = require('../controllers/Roles');
 const router = express.Router();
 // GET route to fetch all users
 
