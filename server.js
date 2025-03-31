@@ -53,7 +53,7 @@ app.use((error, req, res, next) => {
 
 
 mongoose
-    .connect("mongodb+srv://satish:Root123@shipmenttacking.ndlbj.mongodb.net/Shipment_tracking?retryWrites=true&w=majority&appName=ShipmentTacking")
+    .connect(DB_URL)
     .then(() => {
         console.log('MongoDB connected');
     })
