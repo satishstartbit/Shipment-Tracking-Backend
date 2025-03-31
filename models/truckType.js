@@ -8,11 +8,10 @@ const truckTypeSchema = new Schema({
     },
     truck_code: {
         type: String,
-        required: true
+        unique: true
     },
     description: {
-        type: String,
-        required: true
+        type: String
     },
     created_at: {
         type: Date,
@@ -23,5 +22,13 @@ const truckTypeSchema = new Schema({
         default: Date.now
     }
 })
+
+
+truckTypeSchema.pre("save", function (next) {
+    const truck = this;
+    const objectId = truck._id.toString();
+    truck.truck_code = `TRUCKTYPE-${objectId.substring(objectId.length - 6)}`;
+    next();
+});
 
 module.exports = mongoose.model("TruckTypes", truckTypeSchema);

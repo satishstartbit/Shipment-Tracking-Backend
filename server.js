@@ -8,6 +8,7 @@ const userRoutes = require("./routes/AdminuserRoutes"); // Your user routes
 const MobileRoutes = require("./routes/MobileUserRoutes");
 const companyRoutes = require("./routes/AdmincompanyRoutes"); // Your user routes
 const roleRoutes = require("./routes/roleRoutes"); // Your user routes
+const ShipmentRoutes = require("./routes/ShipmentRoutes"); // Your user routes
 
 
 
@@ -34,7 +35,7 @@ app.use("/api/role", roleRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/company", companyRoutes);
 app.use("/mobile", MobileRoutes)
-
+app.use("/shipment", ShipmentRoutes)
 
 app.get('/', (req, res) => {
     res.send('Hello, World!');
