@@ -30,6 +30,31 @@ const createShipment = async (req, res, next) => {
 };
 
 
+const getShipmentDetails = async (req, res, next) => {
+    const { shipmentId } = req.params; // Assuming the shipment ID is passed in the URL
+
+    try {
+        // Find the shipment by ID and populate related fields
+        const shipment = await Shipments.findById(shipmentId)
+            .populate("userid", "name email") // Populating the User with only name and email
+            .populate("plantId", "name location") // Populating the Plant with name and location
+            .populate("truckTypeId", "type capacity") // Populating the TruckType with type and capacity
+            .exec();
+
+        // If the shipment is not found, return a 404 response
+        if (!shipment) {
+            return res.status(404).json({ message: "Shipment not found" });
+        }
+
+        // Return the populated shipment details
+        res.status(200).json({ shipment });
+    } catch (error) {
+        next(error); // Pass the error to the error-handling middleware
+    }
+};
+
+
+
 const createTruckType = async (req, res, next) => {
     const { name, description, } = req.body;
     try {
@@ -46,4 +71,4 @@ const createTruckType = async (req, res, next) => {
     }
 };
 
-module.exports = { createShipment, createTruckType };
+module.exports = { createShipment, createTruckType , getShipmentDetails};

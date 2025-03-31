@@ -2,6 +2,7 @@ const Users = require('../models/user');
 const Session = require('../models/session');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const Roles = require("../models/role")
 
 // Controller to get all roles
 const UserLogin = async (req, res, next) => {
@@ -37,8 +38,14 @@ const UserLogin = async (req, res, next) => {
         });
         await newSession.save();
 
+
+
+
+        const roles = await Roles.findById(user?.roleid); // Fetch all roles        
+
+
         // Send the response back
-        res.status(200).json({ accessToken });
+        res.status(200).json({ accessToken, user, roles });
     } catch (error) {
         console.log("sdcv");
 
