@@ -31,6 +31,7 @@ const loginUser = async (req, res) => {
       message: 'Login successful',
       accessToken,
       refreshToken,
+      user
     });
   } catch (error) {
     res.status(500).json({ message: 'Server error' });

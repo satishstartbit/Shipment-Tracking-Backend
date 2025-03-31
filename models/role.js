@@ -5,7 +5,6 @@ const roleSchema = new Schema({
     name: {
         type: String,
         required: true,
-
     },
     slug: {
         type: String,

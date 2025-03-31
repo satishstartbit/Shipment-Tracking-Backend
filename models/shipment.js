@@ -7,7 +7,6 @@ const shipmentSchema = new Schema({
         type: String,
         unique: true
     },
-
     shipment_status: {
         type: String,
         required: true
@@ -15,13 +14,10 @@ const shipmentSchema = new Schema({
     truck_status: {
         type: String,
     },
-
-    userid: {
+    companyId: {
         type: Schema.Types.ObjectId,
-        ref: "Users",
-        required: true,
+        ref: "TransportCompany",
     },
-
     dock_number: {
         type: String,
     },

@@ -14,7 +14,6 @@ const truckDetailSchema = new Schema({
         type: String,
         required: true
     },
-
     shipmentId: {
         type: Schema.Types.ObjectId,
         ref: "Shipments",

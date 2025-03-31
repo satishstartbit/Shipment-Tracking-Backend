@@ -48,7 +48,6 @@ const UserLogin = async (req, res, next) => {
         res.status(200).json({ accessToken, user, roles });
     } catch (error) {
         console.log("sdcv");
-
         next(error); // Handle error if fetching roles fails
     }
 };

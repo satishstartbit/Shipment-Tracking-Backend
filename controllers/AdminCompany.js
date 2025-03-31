@@ -108,7 +108,7 @@ const getAllTransportCompany = async (req, res, next) => {
         const limit = pageSize;
 
         // Fetch the users with pagination and search filter
-        const Company = await TransportCompany.find(searchQuery)
+        const Company = await TransportCompany.find(searchQuery).populate("munshiId")
             .sort({ createdAt: sortOrder }) // Assuming sorting by `createdAt`, adjust as needed
             .skip(skip)
             .limit(limit);

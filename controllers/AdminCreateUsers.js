@@ -49,7 +49,7 @@ const registerUser = async (req, res, next) => {
 const getUserById = async (req, res, next) => {
     const userId = req.params.id;
     try {
-        const user = await Users.findById(userId);
+        const user = await Users.findById(userId).populate("roleid", "name slug is_active");
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
@@ -58,7 +58,6 @@ const getUserById = async (req, res, next) => {
         next(error);
     }
 };
-
 
 
 
@@ -75,25 +74,49 @@ const getAllUsers = async (req, res, next) => {
         const skip = (pageNo - 1) * pageSize;
         const limit = pageSize;
 
-        // Fetch the users with pagination and search filter
+        // Fetch the users with pagination and search filter, and populate the role
         const users = await Users.find(searchQuery)
-            .sort({ createdAt: sortOrder }) // Assuming sorting by `createdAt`, adjust as needed
+            .populate("roleid", "slug") // Populate the role with only the slug field
+            .sort({ createdAt: sortOrder }) // Sorting by `createdAt`, adjust as needed
             .skip(skip)
             .limit(limit);
 
 
-        // Get the total user count (for pagination purposes)
-        const totalUserCount = await Users.countDocuments(searchQuery);
+
+        // Filter the users based on the role slug ('logistic_person' or 'security_gaurd')
+        const filteredUsers = users.filter(user =>
+            (user.roleid.slug === "logistic_person" || user.roleid.slug === "security_gaurd")
+        );
+
+
+        const totalCount = await Users.aggregate([
+            { $match: searchQuery },  // Apply the search query filter
+            {
+                $lookup: {
+                    from: 'roles',  // Assuming the role collection is called "roles"
+                    localField: 'roleid',  // Field in Users collection
+                    foreignField: '_id',  // Field in Roles collection
+                    as: 'roleDetails'  // New field to hold the joined data
+                }
+            },
+            { $unwind: '$roleDetails' },  // Flatten the joined role data
+            { $match: { 'roleDetails.slug': { $in: ["logistic_person", "security_gaurd"] } } },  // Filter by slugs
+            { $count: 'totalCount' }  // Count the number of matching users
+        ]);
+
+        // Extract total count from aggregation result
+        const totalUsers = totalCount.length > 0 ? totalCount[0].totalCount : 0;
 
         // Respond with paginated users and total count
         res.status(200).json({
-            totalUserCount,
-            usersListing: users,
+            usersListing: filteredUsers,
+            totalUserCount: totalUsers
         });
     } catch (error) {
         next(error); // Handle error if fetching users fails
     }
 };
+
 
 
 
