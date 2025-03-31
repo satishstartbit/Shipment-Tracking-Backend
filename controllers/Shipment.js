@@ -3,7 +3,7 @@ const TruckTypes = require("../models/truckType")
 
 const createShipment = async (req, res, next) => {
     const { shipment_status, truck_status,
-        destination_pin_code, destination_city, destination_state,
+        destination_pin_code, destination_city, destination_state, userid,
         destination_country, expected_arrival_date, actual_arrival_date } = req.body;
 
     try {
@@ -12,6 +12,7 @@ const createShipment = async (req, res, next) => {
             truck_status,
             truckTypeId: "67ea39e273dd50d57514b7a7",
             plantId: "67e53f04a272c03c7431b952",
+            userid,
             destination_pin_code,
             destination_city,
             destination_state,

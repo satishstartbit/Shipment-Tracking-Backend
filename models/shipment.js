@@ -16,6 +16,12 @@ const shipmentSchema = new Schema({
         type: String,
     },
 
+    userid: {
+        type: Schema.Types.ObjectId,
+        ref: "Users",
+        required: true,
+    },
+
     dock_number: {
         type: String,
     },
