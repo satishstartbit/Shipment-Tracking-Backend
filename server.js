@@ -3,7 +3,9 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 require("dotenv").config();
-
+const userRoutes = require("./routes/webportal/userRoutes"); // Your user routes
+const roleRoutes = require("./routes/webportal/roleRoutes"); // Your user routes
+const companyRoutes = require("./routes/webportal/companyRoutes"); // Your user routes
 
 const MobileRoutes = require("./routes/nativeapp/userRoutes");
 
@@ -27,6 +29,10 @@ app.use((req, res, next) => {
     res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
     next();
 });
+
+app.use("/api/users", userRoutes);
+app.use("/api/role", roleRoutes);
+app.use("/api/company", companyRoutes);
 
 
 app.use("/mobile", MobileRoutes)
