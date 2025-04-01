@@ -14,11 +14,6 @@ const truckDetailSchema = new Schema({
         type: String,
         required: true
     },
-    shipmentId: {
-        type: Schema.Types.ObjectId,
-        ref: "Shipments",
-        required: true
-    },
     created_by: {
         type: Schema.Types.ObjectId,
         ref: "Users",

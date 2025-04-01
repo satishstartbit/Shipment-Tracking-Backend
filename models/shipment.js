@@ -48,6 +48,9 @@ const shipmentSchema = new Schema({
     actual_arrival_date: {
         type: Date,
     },
+    mobile_number: {
+        type: String,
+    },
     createdBy: {
         type: Schema.Types.ObjectId,
         ref: "Users",
@@ -55,6 +58,10 @@ const shipmentSchema = new Schema({
     updatedBy: {
         type: Schema.Types.ObjectId,
         ref: "Users",
+    },
+    TruckId: {
+        type: Schema.Types.ObjectId,
+        ref: "TruckDetails"
     },
     created_at: {
         type: Date,

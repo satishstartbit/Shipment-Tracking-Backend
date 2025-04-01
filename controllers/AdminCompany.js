@@ -72,6 +72,81 @@ const registerTransportCompany = async (req, res, next) => {
     }
 };
 
+
+
+const editTransportCompany = async (req, res, next) => {
+    const { company_id, company_name, city, state, country,
+        username, first_name, last_name, email,
+        password, mobile_no, gender,
+        dob, roleid
+    } = req.body;
+
+    try {
+        // Find the transport company by ID
+        const transportCompany = await TransportCompany.findById(company_id);
+        
+        if (!transportCompany) {
+            return res.status(404).json({ message: 'Transport company not found' });
+        }
+
+        // Find the associated user (munshiId in TransportCompany)
+        const user = await Users.findById(transportCompany.munshiId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Check if the email is already taken by another user (except the current user)
+        const existingEmail = await Users.findOne({ email, _id: { $ne: user._id } });
+        if (existingEmail) {
+            return res.status(400).json({ message: 'Email already in use by another user' });
+        }
+
+        // Check if the username is already taken by another user (except the current user)
+        const existingUsername = await Users.findOne({ username, _id: { $ne: user._id } });
+        if (existingUsername) {
+            return res.status(400).json({ message: 'Username already taken by another user' });
+        }
+
+        // Update the user details
+        user.username = username || user.username;
+        user.email = email || user.email;
+        user.password = password || user.password;  // You can add password hashing here
+        user.first_name = first_name || user.first_name;
+        user.last_name = last_name || user.last_name;
+        user.mobile_no = mobile_no || user.mobile_no;
+        user.gender = gender || user.gender;
+        user.dob = dob || user.dob;
+        user.roleid = roleid || user.roleid;
+
+        // Save the updated user
+        await user.save();
+
+        // Update the transport company details
+        transportCompany.company_name = company_name || transportCompany.company_name;
+        transportCompany.city = city || transportCompany.city;
+        transportCompany.state = state || transportCompany.state;
+        transportCompany.country = country || transportCompany.country;
+
+        // Save the updated transport company
+        await transportCompany.save();
+
+        res.status(200).json({
+            message: 'Transport Company and User updated successfully',
+            company: transportCompany,
+            user: user
+        });
+
+    } catch (error) {
+        if (error.code === 11000) {
+            // Duplicate key error, meaning the name already exists
+            return res.status(400).json({ message: 'Transport Company name must be unique. This Company name already exists.' });
+        }
+        // Pass other errors to the error-handling middleware
+        next(error);
+    }
+};
+
+
 const getTransportCompanyById = async (req, res, next) => {
     const plantId = req.params.id;
     console.log("plantId", plantId);
@@ -144,4 +219,7 @@ const deleteTransportCompanyById = async (req, res, next) => {
     }
 };
 
-module.exports = { registerTransportCompany, getTransportCompanyById, getAllTransportCompany, deleteTransportCompanyById };
+module.exports = {
+    registerTransportCompany, getTransportCompanyById, getAllTransportCompany,
+    deleteTransportCompanyById , editTransportCompany
+};
