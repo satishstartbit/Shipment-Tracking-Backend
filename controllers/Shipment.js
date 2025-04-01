@@ -1,7 +1,7 @@
 const Shipments = require("../models/shipment")
 const TruckTypes = require("../models/truckType")
 const TransportCompany = require('../models/transportCompany');
-const Roles = require("../models/role")
+const TruckDetails = require("../models/truckDetail")
 
 const createShipment = async (req, res, next) => {
     const { shipment_status, truck_status,
@@ -34,14 +34,13 @@ const createShipment = async (req, res, next) => {
 
 
 const getShipmentDetails = async (req, res, next) => {
-    const { shipmentId } = req.params; // Assuming the shipment ID is passed in the URL
+    const { id } = req.params; // Assuming the shipment ID is passed in the URL
 
     try {
         // Find the shipment by ID and populate related fields
-        const shipment = await Shipments.findById(shipmentId)
-            .populate("userid", "name email") // Populating the User with only name and email
-            .populate("plantId", "name location") // Populating the Plant with name and location
-            .populate("truckTypeId", "type capacity") // Populating the TruckType with type and capacity
+        const shipment = await Shipments.findById(id)
+            .populate("companyId", "") // Populating the Plant with name and location
+            .populate("truckTypeId", "") // Populating the TruckType with type and capacity
             .exec();
 
         // If the shipment is not found, return a 404 response
@@ -49,12 +48,28 @@ const getShipmentDetails = async (req, res, next) => {
             return res.status(404).json({ message: "Shipment not found" });
         }
 
+
+        const TruckDetail = await TruckDetails.find({ shipmentId: id })
+
+
+        if (!TruckDetail) {
+            return res.status(404).json({ message: "Truck details not found" });
+        }
+
         // Return the populated shipment details
-        res.status(200).json({ shipment });
+        res.status(200).json({ shipment , TruckDetail});
     } catch (error) {
         next(error); // Pass the error to the error-handling middleware
     }
 };
+
+
+
+
+
+
+
+
 
 const getAllShipments = async (req, res, next) => {
     try {
@@ -199,7 +214,6 @@ const createTruckType = async (req, res, next) => {
             name,
             description,
         });
-
         // Save the truck type
         await truck.save();
         res.status(200).json({ truck });

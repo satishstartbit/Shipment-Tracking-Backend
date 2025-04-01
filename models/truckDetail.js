@@ -21,12 +21,12 @@ const truckDetailSchema = new Schema({
     },
     created_by: {
         type: Schema.Types.ObjectId,
-        ref: "User",
+        ref: "Users",
         required: true
     },
     updated_by: {
         type: Schema.Types.ObjectId,
-        ref: "User",
+        ref: "Users",
         required: true
     },
     created_at: {

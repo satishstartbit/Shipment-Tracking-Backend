@@ -39,8 +39,6 @@ const UserLogin = async (req, res, next) => {
         await newSession.save();
 
 
-
-
         const roles = await Roles.findById(user?.roleid); // Fetch all roles        
 
 
