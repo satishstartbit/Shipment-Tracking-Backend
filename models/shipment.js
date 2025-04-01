@@ -23,11 +23,11 @@ const shipmentSchema = new Schema({
     },
     truckTypeId: {
         type: Schema.Types.ObjectId,
-        ref: "TruckType",
+        ref: "TruckTypes",
     },
     plantId: {
         type: Schema.Types.ObjectId,
-        ref: "Plant",
+        ref: "Plants",
     },
     destination_pin_code: {
         type: String,
@@ -50,11 +50,11 @@ const shipmentSchema = new Schema({
     },
     createdBy: {
         type: Schema.Types.ObjectId,
-        ref: "User",
+        ref: "Users",
     },
     updatedBy: {
         type: Schema.Types.ObjectId,
-        ref: "User",
+        ref: "Users",
     },
     created_at: {
         type: Date,

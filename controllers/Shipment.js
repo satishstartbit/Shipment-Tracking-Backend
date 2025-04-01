@@ -1,6 +1,7 @@
 const Shipments = require("../models/shipment")
 const TruckTypes = require("../models/truckType")
 const TransportCompany = require('../models/transportCompany');
+const Roles = require("../models/role")
 
 const createShipment = async (req, res, next) => {
     const { shipment_status, truck_status,
@@ -57,24 +58,95 @@ const getShipmentDetails = async (req, res, next) => {
 
 const getAllShipments = async (req, res, next) => {
     try {
-        // Retrieve all shipments and populate related fields
-        const shipments = await Shipments.find()
-            .populate("userid", "name email") // Populating the User with only name and email
-            .populate("plantId", "name location") // Populating the Plant with name and location
-            .populate("truckTypeId", "type capacity") // Populating the TruckType with type and capacity
-            .exec();
+        // Destructure query parameters from the request
+        const { page_size = 10, page_no = 1, search = '', order = 'asc', slug = 'logistic_person', userid = null } = req.body;
+
+        // Create the pagination and ordering logic
+        const skip = (page_no - 1) * page_size;  // For skipping records based on page number
+        const limit = parseInt(page_size); // Number of records to fetch
+        const sortOrder = order === 'desc' ? -1 : 1;  // Sort order (ascending or descending)
+
+
+        // Build the search filter
+        const searchFilter = search
+            ? {
+                $or: [
+                    { 'createdBy.first_name': { $regex: search, $options: 'i' } },
+                    { 'createdBy.last_name': { $regex: search, $options: 'i' } },
+                ]
+            }
+            : {};  // If search is provided, match it on first name or last name, otherwise no filter
+
+        // Initialize the filters object
+        let filters = { ...searchFilter };
+
+        // Modify filters based on the slug
+        if (slug === 'security_gaurd') {
+            // Add an additional filter for the 'Confirmed' status if the role is 'security_gaurd'
+            filters = { ...filters, shipment_status: 'Confirmed' };
+        } else if (slug === "Munshi") {
+            filters = { ...filters, shipment_status: 'Assigned' };
+        }
+
+        let shipments = []
+        let totalShipments = 0
+        if (slug === "Munshi") {
+            if (!userid) {
+                return res.status(404).json({ message: 'User ID can not ne null' });
+            }
+
+            // Retrieve the shipments with filters, pagination, and sorting
+            shipments = await Shipments.find(filters)
+                .populate({
+                    path: 'companyId', // Populate the 'companyId' field
+                    match: { 'munshiId': userid }, // Filter on the 'munshiId' field of the referenced document
+                    select: '', // Select the fields you want to include from the populated document
+                })
+                .populate('truckTypeId', '')  // Populate the truck type data
+                .sort({ created_at: sortOrder })  // Sort by created_at or any other field as needed
+                .skip(skip)  // Pagination: skip records based on page
+                .limit(limit)  // Pagination: limit number of records per page
+                .exec();
+
+            // Count the total number of shipments for pagination info
+            totalShipments = await Shipments.countDocuments(filters);
+
+        } else {
+            // Retrieve the shipments with filters, pagination, and sorting
+            shipments = await Shipments.find(filters)
+                .populate('createdBy', '')  // Populate user data
+                .populate('truckTypeId', '')  // Populate the truck type data
+                .sort({ created_at: sortOrder })  // Sort by created_at or any other field as needed
+                .skip(skip)  // Pagination: skip records based on page
+                .limit(limit)  // Pagination: limit number of records per page
+                .exec();
+
+            // Count the total number of shipments for pagination info
+            totalShipments = await Shipments.countDocuments(filters);
+        }
+
 
         // If no shipments are found, return a 404 response
         if (shipments.length === 0) {
-            return res.status(404).json({ message: "No shipments found" });
+            return res.status(404).json({ message: 'No shipments found' });
         }
 
-        // Return the populated shipment details
-        res.status(200).json({ shipments });
+        // Return the populated shipment details with pagination information
+        res.status(200).json({
+            shipments,
+            totalShipments,
+            page_size: parseInt(page_size),
+            page_no: parseInt(page_no),
+            total_pages: Math.ceil(totalShipments / page_size),  // Calculate total pages
+            has_next: (page_no * page_size) < totalShipments,  // Check if there is a next page
+            has_prev: page_no > 1  // Check if there is a previous page
+        });
     } catch (error) {
-        next(error); // Pass the error to the error-handling middleware
+        next(error);  // Pass the error to the error-handling middleware
     }
 };
+
+
 
 
 
@@ -156,4 +228,7 @@ const getAllTruckTypes = async (req, res, next) => {
 };
 
 
-module.exports = { createShipment, createTruckType, getShipmentDetails, getAllShipments, getAllTruckTypes, assignShipmentToCompany };
+module.exports = {
+    createShipment, createTruckType, getShipmentDetails,
+    getAllShipments, getAllTruckTypes, assignShipmentToCompany
+};
