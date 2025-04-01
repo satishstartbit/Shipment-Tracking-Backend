@@ -1,4 +1,4 @@
-const TruckDetails = require("../models/truckDetail")
+const TruckDetails = require("../models/truckDetail");
 
 const AddTruckDetails = async (req, res, next) => {
     try {
@@ -7,6 +7,15 @@ const AddTruckDetails = async (req, res, next) => {
         // Check if all required fields are provided
         if (!driver_name || !mobile_number || !truck_number || !shipmentId || !created_by) {
             return res.status(400).json({ message: "All fields are required" });
+        }
+
+        // Check if a TruckDetail with the same shipmentId already exists
+        const existingTruckDetail = await TruckDetails.findOne({ shipmentId });
+
+        if (existingTruckDetail) {
+            return res.status(400).json({
+                message: `Truck details for shipmentId ${shipmentId} already exist. Cannot create a duplicate record.`
+            });
         }
 
         // Create a new truck detail entry
@@ -33,8 +42,5 @@ const AddTruckDetails = async (req, res, next) => {
         next(error);
     }
 };
-
-module.exports = { AddTruckDetails };
-
 
 module.exports = { AddTruckDetails };
