@@ -45,6 +45,52 @@ const registerUser = async (req, res, next) => {
 };
 
 
+
+// Controller to edit user details
+const editUserDetails = async (req, res, next) => {
+    const {userId, username, first_name, last_name, email, mobile_no, gender, dob, avatar, roleid } = req.body;
+
+    try {
+        // Check if the email already exists, excluding the current user's email
+        const existingEmail = await Users.findOne({ email, _id: { $ne: userId } });
+        if (existingEmail) {
+            return res.status(400).json({ message: 'Email already in use' });
+        }
+
+        // Check if the username already exists, excluding the current user's username
+        const existingUsername = await Users.findOne({ username, _id: { $ne: userId } });
+        if (existingUsername) {
+            return res.status(400).json({ message: 'Username already taken' });
+        }
+
+        // Find the user and update their details
+        const user = await Users.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Update the user details
+        user.username = username || user.username;
+        user.email = email || user.email;
+        user.first_name = first_name || user.first_name;
+        user.last_name = last_name || user.last_name;
+        user.mobile_no = mobile_no || user.mobile_no;
+        user.gender = gender || user.gender;
+        user.avatar = avatar || user.avatar;
+        user.dob = dob || user.dob;
+        user.roleid = roleid || user.roleid;
+
+        // Save the updated user
+        await user.save();
+
+        res.status(200).json({ message: 'User details updated successfully', user });
+    } catch (error) {
+        next(error); // Passing the error to the error handling middleware
+    }
+};
+
+
+
 // Controller to get user details by ID
 const getUserById = async (req, res, next) => {
     const userId = req.params.id;
@@ -139,4 +185,4 @@ const deleteUserById = async (req, res, next) => {
 };
 
 
-module.exports = { registerUser, getUserById, getAllUsers, deleteUserById };
+module.exports = { registerUser, getUserById, getAllUsers, deleteUserById, editUserDetails };

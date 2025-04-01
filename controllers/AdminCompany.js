@@ -84,7 +84,7 @@ const editTransportCompany = async (req, res, next) => {
     try {
         // Find the transport company by ID
         const transportCompany = await TransportCompany.findById(company_id);
-        
+
         if (!transportCompany) {
             return res.status(404).json({ message: 'Transport company not found' });
         }
@@ -221,5 +221,5 @@ const deleteTransportCompanyById = async (req, res, next) => {
 
 module.exports = {
     registerTransportCompany, getTransportCompanyById, getAllTransportCompany,
-    deleteTransportCompanyById , editTransportCompany
+    deleteTransportCompanyById, editTransportCompany
 };

@@ -1,11 +1,13 @@
 const express = require('express');
-const { registerUser, getUserById, getAllUsers, deleteUserById } = require('../controllers/AdminCreateUsers');
+const { registerUser, getUserById, getAllUsers, deleteUserById , editUserDetails} = require('../controllers/AdminCreateUsers');
 const { loginUser, refreshAccessToken } = require('../controllers/AdminAuthController');
 
 const router = express.Router();
 
 // POST route to register a new user
 router.post('/registeruser', registerUser);
+router.post('/updateuser', editUserDetails);
+
 
 // GET route to get user details by ID
 router.get('/:id', getUserById);
