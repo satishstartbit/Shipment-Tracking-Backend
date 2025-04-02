@@ -2,7 +2,16 @@ const path = require("path");
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
+const cors = require("cors")
 require("dotenv").config();
+
+
+
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+app.use(cors({
+    origin:"*"
+}))
 
 const userRoutes = require("./routes/AdminuserRoutes"); // Your user routes
 const MobileRoutes = require("./routes/MobileUserRoutes");
@@ -19,8 +28,7 @@ const PORT = process.env.PORT || 3000;
 const DB_URL = process.env.DATABASE_URL;
 
 
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+
 
 app.use((req, res, next) => {
     res.setHeader("Access-Control-Allow-Origin", "*");
