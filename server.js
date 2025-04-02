@@ -7,11 +7,6 @@ require("dotenv").config();
 
 
 
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
-app.use(cors({
-    origin:"*"
-}))
 
 const userRoutes = require("./routes/AdminuserRoutes"); // Your user routes
 const MobileRoutes = require("./routes/MobileUserRoutes");
@@ -23,6 +18,14 @@ const verifyToken = require('./utils/VerifyToken'); // Import the verifyToken mi
 
 
 const app = express();
+
+
+
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+app.use(cors({
+    origin:"*"
+}))
 
 const PORT = process.env.PORT || 3000;
 const DB_URL = process.env.DATABASE_URL;
@@ -42,7 +45,7 @@ app.use((req, res, next) => {
 
 app.use("/api/role",verifyToken, roleRoutes);
 app.use("/api/users", userRoutes);
-app.use("/api/company",verifyToken, companyRoutes);
+app.use("/api/company", companyRoutes);
 app.use("/mobile", MobileRoutes)
 app.use("/shipment",verifyToken, ShipmentRoutes)
 
