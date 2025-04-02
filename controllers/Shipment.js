@@ -4,15 +4,14 @@ const TransportCompany = require('../models/transportCompany');
 const TruckDetails = require("../models/truckDetail")
 
 const createShipment = async (req, res, next) => {
-    const { shipment_status, truck_status,
+    const { shipment_status, truckTypeId,
         destination_pin_code, destination_city, destination_state, userid,
         destination_country, expected_arrival_date, actual_arrival_date } = req.body;
 
     try {
         const shipment = new Shipments({
-            shipment_status,
-            truck_status,
-            truckTypeId: "67ea39e273dd50d57514b7a7",
+            shipment_status: "Planned",
+            truckTypeId: truckTypeId ?? "67ea39e273dd50d57514b7a7",
             plantId: "67e53f04a272c03c7431b952",
             createdBy: userid,
             updatedBy: userid,
@@ -66,11 +65,6 @@ const getShipmentDetails = async (req, res, next) => {
 
 const getAllShipments = async (req, res, next) => {
 
-    const token = req.headers['authorization'];
-
-    if (!token) {
-        return res.status(403).json({ message: 'No token provided' });
-    }
     try {
         // Destructure query parameters from the request
         const { page_size = 10, page_no = 1, search = '', order = 'asc', slug = 'logistic_person', userid = null } = req.body;
@@ -188,8 +182,8 @@ const assignShipmentToCompany = async (req, res, next) => {
 
         // Assign the shipment to the company (assuming the Company model has a `shipments` field)
         shipment.companyId = companyId;
-
         shipment.mobile_number = mobile_number;
+        shipment.shipment_status = "Assigned"
 
 
         // Save the updated shipment
@@ -250,9 +244,6 @@ const getAllTruckTypes = async (req, res, next) => {
 
 
 
-
-
-
 const assignDockNumber = async (req, res, next) => {
     const { shipmentId } = req.params; // Shipment ID passed as a URL parameter
 
@@ -269,8 +260,7 @@ const assignDockNumber = async (req, res, next) => {
             // If dock_number is already assigned, return the current status
             return res.status(200).json({
                 message: 'Dock number already assigned',
-                dock_number: shipment.dock_number,
-                truck_status: shipment.truck_status
+                dock_number: shipment.dock_number
             });
         }
 
@@ -286,9 +276,9 @@ const assignDockNumber = async (req, res, next) => {
             newDockNumber = `DOCK_Number-${nextNumericPart.toString().padStart(6, '0')}`;
         }
 
-        // Step 4: Update the shipment with the new dock_number and set truck_status to "Loaded"
+        // Step 4: Update the shipment with the new dock_number and set shipment_status  to "Loaded"
         shipment.dock_number = newDockNumber;
-        shipment.truck_status = 'Loaded';
+        shipment.shipment_status = 'Loaded';
 
         // Step 5: Save the updated shipment
         const updatedShipment = await shipment.save();
@@ -300,8 +290,41 @@ const assignDockNumber = async (req, res, next) => {
     }
 };
 
+
+
+
+
+const getInTruck = async (req, res, next) => {
+    const { shipmentId } = req.params; // Shipment ID passed as a URL parameter
+
+    try {
+        // Step 1: Fetch the existing shipment by shipmentId
+        const shipment = await Shipments.findById(shipmentId);
+
+        if (!shipment) {
+            return res.status(404).json({ message: 'Shipment not found' });
+        }
+
+
+        shipment.shipment_status = 'GateIn';
+
+
+        const updatedShipment = await shipment.save();
+
+        // Step 6: Return the updated shipment
+        res.status(200).json({ shipment: updatedShipment });
+    } catch (error) {
+        next(error); // Pass the error to the next middleware
+    }
+};
+
+
+
+
+
+
 module.exports = {
     createShipment, createTruckType, getShipmentDetails,
     getAllShipments, getAllTruckTypes, assignShipmentToCompany,
-    assignDockNumber
+    assignDockNumber, getInTruck
 };

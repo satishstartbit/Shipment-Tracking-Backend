@@ -19,9 +19,8 @@ const AddTruckDetails = async (req, res, next) => {
 
 
         const TruckDetail = await TruckDetails.findById(shipmentId.TruckId);
-        console.log("TruckDetail", TruckDetail);
 
-        if (!TruckDetail  ) {
+        if (!TruckDetail) {
             // If no existing truck detail, create a new one
             const newTruckDetail = new TruckDetails({
                 driver_name,
@@ -38,6 +37,7 @@ const AddTruckDetails = async (req, res, next) => {
 
             // Update the TruckId in the shipment document
             shipment.TruckId = savedTruckDetail._id;
+            shipment.shipment_status = "Confirmed"
             await shipment.save();
 
 

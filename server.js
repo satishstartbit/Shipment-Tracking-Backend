@@ -10,6 +10,7 @@ const companyRoutes = require("./routes/AdmincompanyRoutes"); // Your user route
 const roleRoutes = require("./routes/roleRoutes"); // Your user routes
 const ShipmentRoutes = require("./routes/ShipmentRoutes"); // Your user routes
 
+const verifyToken = require('./utils/VerifyToken'); // Import the verifyToken middleware
 
 
 const app = express();
@@ -31,11 +32,11 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use("/api/role", roleRoutes);
+app.use("/api/role",verifyToken, roleRoutes);
 app.use("/api/users", userRoutes);
-app.use("/api/company", companyRoutes);
+app.use("/api/company",verifyToken, companyRoutes);
 app.use("/mobile", MobileRoutes)
-app.use("/shipment", ShipmentRoutes)
+app.use("/shipment",verifyToken, ShipmentRoutes)
 
 app.get('/', (req, res) => {
     res.send('Hello, World!');

@@ -25,7 +25,7 @@ const UserLogin = async (req, res, next) => {
 
 
         // Generate JWT token (expires in 1 hour)
-        const accessToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        const accessToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRATION });
 
         // Store the session with device info
         const newSession = new Session({

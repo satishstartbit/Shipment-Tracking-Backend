@@ -11,9 +11,6 @@ const shipmentSchema = new Schema({
         type: String,
         required: true
     },
-    truck_status: {
-        type: String,
-    },
     companyId: {
         type: Schema.Types.ObjectId,
         ref: "TransportCompany",

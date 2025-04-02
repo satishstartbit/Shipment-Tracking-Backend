@@ -1,7 +1,7 @@
 const express = require('express');
 const { createTruckType, createShipment, getShipmentDetails,
-    getAllShipments, getAllTruckTypes, assignShipmentToCompany, 
-    assignDockNumber
+    getAllShipments, getAllTruckTypes, assignShipmentToCompany,
+    assignDockNumber, getInTruck
 } = require('../controllers/Shipment');
 
 
@@ -22,5 +22,7 @@ router.post('/assignshipment', assignShipmentToCompany);
 router.post('/createtruck', AddTruckDetails);
 
 router.get('/assigndocknumber/:shipmentId', assignDockNumber);
+router.get('/getintruck/:shipmentId', getInTruck);
+
 
 module.exports = router;
