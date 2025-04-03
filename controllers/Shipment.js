@@ -30,17 +30,14 @@ const ShipmentNumber = async (req, res, next) => {
             }
         }
 
-        // Check if the generated shipment_number already exists in the database
-        let shipmentExists = await Shipments.findOne({ shipment_number: newShipmentNumber });
+        // Directly check if the generated shipment number already exists in the database
+        const shipmentExists = await Shipments.exists({ shipment_number: newShipmentNumber });
 
-        // If it exists, generate a new one until we find a unique number
-        while (shipmentExists) {
+        // If it exists, generate a new one
+        if (shipmentExists) {
             const numericPart = parseInt(newShipmentNumber.split('-')[1], 10);
             const nextNumericPart = numericPart + 1;
             newShipmentNumber = `SHIPNUM-${nextNumericPart.toString().padStart(6, '0')}`;
-
-            // Check if the new shipment number is already taken
-            shipmentExists = await Shipments.findOne({ shipment_number: newShipmentNumber });
         }
 
         const shipment = new Shipments({
@@ -59,6 +56,7 @@ const ShipmentNumber = async (req, res, next) => {
         next(error);
     }
 };
+
 
 
 
