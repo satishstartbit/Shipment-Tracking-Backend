@@ -62,31 +62,35 @@ const ShipmentNumber = async (req, res, next) => {
 
 
 
-
 const createShipment = async (req, res, next) => {
-    const { shipment_status, truckTypeId,
-        destination_pin_code, destination_city, destination_state, userid,
-        destination_country, expected_arrival_date, actual_arrival_date } = req.body;
+    const { shipment_id, truckTypeId, destination_pin_code, destination_city,
+        destination_state, userid, destination_country, actual_arrival_date } = req.body;
 
     try {
-        const shipment = new Shipments({
-            shipment_status: "Planned",
-            truckTypeId: truckTypeId ?? "67ea39e273dd50d57514b7a7",
-            plantId: "67e53f04a272c03c7431b952",
-            createdBy: userid,
-            updatedBy: userid,
-            destination_pin_code,
-            destination_city,
-            destination_state,
-            destination_country,
-            expected_arrival_date,
-            actual_arrival_date,
-            active: true
+        // Find the shipment by ID
+        const shipment = await Shipments.findById(shipment_id);
 
-        });
+        // If shipment does not exist, return a 404 response
+        if (!shipment) {
+            return res.status(404).json({ message: 'Shipment not found' });
+        }
 
-        // Save the shipment document
+        // Update the shipment with the new details
+        shipment.shipment_status = "Planned";
+        shipment.truckTypeId = truckTypeId ?? shipment.truckTypeId;
+        shipment.destination_pin_code = destination_pin_code ?? shipment.destination_pin_code;
+        shipment.destination_city = destination_city ?? shipment.destination_city;
+        shipment.destination_state = destination_state ?? shipment.destination_state;
+        shipment.destination_country = destination_country ?? shipment.destination_country;
+        shipment.expected_arrival_date = actual_arrival_date ?? shipment.actual_arrival_date;
+        shipment.actual_arrival_date = actual_arrival_date ?? shipment.actual_arrival_date;
+        shipment.updatedBy = userid;
+        shipment.active = true;  // You can modify this as needed
+
+        // Save the updated shipment document
         await shipment.save();
+
+        // Respond with the updated shipment
         res.status(200).json({ shipment });
     } catch (error) {
         next(error);
