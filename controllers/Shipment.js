@@ -3,43 +3,23 @@ const TruckTypes = require("../models/truckType")
 const TransportCompany = require('../models/transportCompany');
 const Users = require('../models/user');
 const nodemailer = require('nodemailer');
-
+const Counter = require("../models/shipmentCounter")
 
 const ShipmentNumber = async (req, res, next) => {
     const { userid } = req.body;
 
     try {
-        let newShipmentNumber = 'SHIPNUM-000001'; // Default if no shipments exist
+        // Increment the shipment number counter
+        const counter = await Counter.findOneAndUpdate(
+            { _id: "shipment_number" }, // Use a unique identifier for the counter
+            { $inc: { sequence_value: 1 } }, // Atomically increment the sequence
+            { new: true, upsert: true } // Create the counter if it doesn't exist
+        );
 
-        // Find the most recent shipment to get the last shipment number
-        const lastShipment = await Shipments.findOne().sort({ shipment_number: -1 }).limit(1);
+        // Generate the new shipment number using the incremented sequence value
+        const newShipmentNumber = `SHIPNUM-${counter.sequence_value.toString().padStart(6, '0')}`;
 
-        if (lastShipment && lastShipment.shipment_number) {
-            const lastShipmentNumber = lastShipment.shipment_number;
-            const splitShipmentNumber = lastShipmentNumber.split('-');
-
-            // Ensure the split part is valid and can be parsed
-            if (splitShipmentNumber.length === 2) {
-                const numericPart = parseInt(splitShipmentNumber[1], 10);
-
-                // Check if the numeric part is a valid number
-                if (!isNaN(numericPart)) {
-                    let nextNumericPart = numericPart + 1;
-                    newShipmentNumber = `SHIPNUM-${nextNumericPart.toString().padStart(6, '0')}`;
-                }
-            }
-        }
-
-        // Directly check if the generated shipment number already exists in the database
-        const shipmentExists = await Shipments.exists({ shipment_number: newShipmentNumber });
-
-        // If it exists, generate a new one
-        if (shipmentExists) {
-            const numericPart = parseInt(newShipmentNumber.split('-')[1], 10);
-            const nextNumericPart = numericPart + 1;
-            newShipmentNumber = `SHIPNUM-${nextNumericPart.toString().padStart(6, '0')}`;
-        }
-
+        // Create the new shipment document
         const shipment = new Shipments({
             shipment_status: "New",
             plantId: "67e53f04a272c03c7431b952",
@@ -56,6 +36,7 @@ const ShipmentNumber = async (req, res, next) => {
         next(error);
     }
 };
+
 
 
 
