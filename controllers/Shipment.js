@@ -2,6 +2,11 @@ const Shipments = require("../models/shipment")
 const TruckTypes = require("../models/truckType")
 const TransportCompany = require('../models/transportCompany');
 const TruckDetails = require("../models/truckDetail")
+const Users = require('../models/user');
+
+
+const nodemailer = require('nodemailer');
+
 
 const createShipment = async (req, res, next) => {
     const { shipment_status, truckTypeId,
@@ -163,6 +168,20 @@ const getAllShipments = async (req, res, next) => {
 const assignShipmentToCompany = async (req, res, next) => {
     const { shipmentId, companyId, mobile_number } = req.body; // shipmentId and companyId passed in the request body
 
+
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: process.env.SMTP_EMAIL,
+            pass: process.env.SMTP_PASSWORD
+        },
+        tls: {
+            rejectUnauthorized: false
+        }
+    });
+
+
+
     try {
         // Find the shipment by its ID
         const shipment = await Shipments.findById(shipmentId);
@@ -184,6 +203,111 @@ const assignShipmentToCompany = async (req, res, next) => {
         shipment.companyId = companyId;
         shipment.mobile_number = mobile_number;
         shipment.shipment_status = "Assigned"
+
+
+        const user = await Users.findById(shipment.createdBy)
+        const munshiuser = await Users.findById(company.munshiId)
+
+
+
+
+        // Set up email message
+        const mailOptions = {
+            from: user?.email,
+            to: munshiuser?.email,
+            subject: 'Shipment Assignment – Truck & Driver Details Required',
+            html: `<!DOCTYPE html>
+                    <html lang="en">
+                    <head>
+                        <meta charset="UTF-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <title>Shipment Assignment</title>
+                        <style>
+                            body {
+                                font-family: Arial, sans-serif;
+                                background-color: #f4f4f4;
+                                margin: 0;
+                                padding: 20px;
+                            }
+                    
+                            .email-container {
+                                background-color: #ffffff;
+                                padding: 20px;
+                                border-radius: 8px;
+                                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                                width: 600px;
+                                margin: 0 auto;
+                            }
+                            h2 {
+                                color: #333;
+                            }
+                            .message-content {
+                                background-color: #ededed;
+                                padding: 15px;
+                                margin-bottom: 20px;
+                                border-radius: 8px;
+                            }
+                    
+                            .message-content p {
+                                color: #555;
+                                font-size: 16px;
+                            }
+                    
+                            .button {
+                                background-color: #4CAF50;
+                                color: white;
+                                padding: 10px 20px;
+                                text-decoration: none;
+                                border-radius: 5px;
+                                display: inline-block;
+                            }
+                    
+                            .footer {
+                                font-size: 12px;
+                                color: #777;
+                                text-align: center;
+                                margin-top: 20px;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="email-container">
+                            
+                            <div class="message-content">
+                                <p>Dear ${company?.company_name},</p>
+                                <p>We are pleased to inform you that a new shipment has been assigned to your company.
+                                 To ensure seamless coordination and timely delivery, please provide the truck details, 
+                                including the registration number and driver information, at your earliest convenience.</p>
+                                
+                                <p><strong>Shipment Details:</strong></p>
+                                <ul>
+                                    <li><strong>Shipment Number:</strong> ${shipment?.shipment_number}</li>
+                                    <li><strong>Assigned Transport Company:</strong>${company?.company_name} </li>
+                                    <li><strong>Status:</strong> ${shipment?.shipment_status}</li>
+                                </ul>
+                                
+                                <p>Kindly update the required details before the scheduled pickup time. 
+                                If you have any questions or require further assistance, 
+                                please do not hesitate to contact us.</p>
+                                
+                            </div>
+                    
+                            <div class="footer">
+                                <p>Thank you for your cooperation.</p>
+                            </div>
+                        </div>
+                    </body>
+                    </html>`
+        };
+
+        // Send email
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.log('Error sending email:', error);
+            } else {
+                console.log('Email sent: ' + info.response);
+            }
+        });
 
 
         // Save the updated shipment
