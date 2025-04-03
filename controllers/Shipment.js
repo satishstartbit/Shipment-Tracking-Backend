@@ -1,11 +1,66 @@
 const Shipments = require("../models/shipment")
 const TruckTypes = require("../models/truckType")
 const TransportCompany = require('../models/transportCompany');
-const TruckDetails = require("../models/truckDetail")
 const Users = require('../models/user');
-
-
 const nodemailer = require('nodemailer');
+
+
+const ShipmentNumber = async (req, res, next) => {
+    const { userid } = req.body;
+
+    try {
+        let newShipmentNumber = 'SHIPNUM-000001'; // Default if no shipments exist
+
+        // Find the most recent shipment to get the last shipment number
+        const lastShipment = await Shipments.findOne().sort({ shipment_number: -1 }).limit(1);
+
+        if (lastShipment && lastShipment.shipment_number) {
+            const lastShipmentNumber = lastShipment.shipment_number;
+            const splitShipmentNumber = lastShipmentNumber.split('-');
+
+            // Ensure the split part is valid and can be parsed
+            if (splitShipmentNumber.length === 2) {
+                const numericPart = parseInt(splitShipmentNumber[1], 10);
+
+                // Check if the numeric part is a valid number
+                if (!isNaN(numericPart)) {
+                    let nextNumericPart = numericPart + 1;
+                    newShipmentNumber = `SHIPNUM-${nextNumericPart.toString().padStart(6, '0')}`;
+                }
+            }
+        }
+
+        // Check if the generated shipment_number already exists in the database
+        let shipmentExists = await Shipments.findOne({ shipment_number: newShipmentNumber });
+
+        // If it exists, generate a new one until we find a unique number
+        while (shipmentExists) {
+            const numericPart = parseInt(newShipmentNumber.split('-')[1], 10);
+            const nextNumericPart = numericPart + 1;
+            newShipmentNumber = `SHIPNUM-${nextNumericPart.toString().padStart(6, '0')}`;
+
+            // Check if the new shipment number is already taken
+            shipmentExists = await Shipments.findOne({ shipment_number: newShipmentNumber });
+        }
+
+        const shipment = new Shipments({
+            shipment_status: "New",
+            plantId: "67e53f04a272c03c7431b952",
+            createdBy: userid,
+            updatedBy: userid,
+            active: false,
+            shipment_number: newShipmentNumber
+        });
+
+        // Save the shipment document
+        await shipment.save();
+        res.status(200).json({ shipment });
+    } catch (error) {
+        next(error);
+    }
+};
+
+
 
 
 const createShipment = async (req, res, next) => {
@@ -26,6 +81,8 @@ const createShipment = async (req, res, next) => {
             destination_country,
             expected_arrival_date,
             actual_arrival_date,
+            active: true
+
         });
 
         // Save the shipment document
@@ -52,10 +109,6 @@ const getShipmentDetails = async (req, res, next) => {
         if (!shipment) {
             return res.status(404).json({ message: "Shipment not found" });
         }
-
-
-
-
 
 
         // Return the populated shipment details
@@ -91,7 +144,7 @@ const getAllShipments = async (req, res, next) => {
             : {};  // If search is provided, match it on first name or last name, otherwise no filter
 
         // Initialize the filters object
-        let filters = { ...searchFilter };
+        let filters = { ...searchFilter, active: true };
 
         // Modify filters based on the slug
         if (slug === 'security_gaurd') {
@@ -447,8 +500,10 @@ const getInTruck = async (req, res, next) => {
 
 
 
+
+
 module.exports = {
     createShipment, createTruckType, getShipmentDetails,
     getAllShipments, getAllTruckTypes, assignShipmentToCompany,
-    assignDockNumber, getInTruck
+    assignDockNumber, getInTruck, ShipmentNumber
 };

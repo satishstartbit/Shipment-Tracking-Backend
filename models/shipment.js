@@ -31,7 +31,6 @@ const shipmentSchema = new Schema({
     },
     destination_city: {
         type: String,
-        required: true
     },
     destination_state: {
         type: String,
@@ -67,23 +66,13 @@ const shipmentSchema = new Schema({
     updated_at: {
         type: Date,
         default: Date.now,
+    },
+    active: {
+        type: Boolean
     }
 });
 
 
 
-
-// Pre-save hook to generate unique shipment_number using MongoDB's ObjectId
-shipmentSchema.pre("save", function (next) {
-    const shipment = this;
-
-    // Get the MongoDB ObjectId and convert it to a string
-    const objectId = shipment._id.toString();
-
-    // Generate the shipment number using ObjectId (e.g., SHIP_NUM-000001, SHIP_NUM-000002)
-    shipment.shipment_number = `SHIPNUM-${objectId.substring(objectId.length - 6)}`;
-
-    next();
-});
 
 module.exports = mongoose.model("Shipments", shipmentSchema);
