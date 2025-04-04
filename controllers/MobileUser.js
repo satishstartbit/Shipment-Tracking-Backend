@@ -6,9 +6,10 @@ const Roles = require("../models/role")
 
 // Controller to get all roles
 const UserLogin = async (req, res, next) => {
-    const { emailOrUsername, password, deviceInfo } = req.body;
+    const { emailOrUsername, password, mobile_id, deviceInfo, push_notification_token } = req.body;
 
     try {
+
         // Find the user by email or username
         const user = await Users.findOne({
             $or: [{ email: emailOrUsername }, { username: emailOrUsername }],
@@ -21,6 +22,37 @@ const UserLogin = async (req, res, next) => {
         const isPasswordValid = password === user.password
         if (!isPasswordValid) {
             return res.status(400).json({ message: 'Invalid credentials' });
+        }
+
+
+
+        // Check and update push_notifications if mobile_id and token are provided
+        if (mobile_id && push_notification_token) {
+            // Check if mobile_id already exists in push_notifications array
+            const existingNotification = user.push_notifications.find(
+                (notif) => notif.mobile_id === mobile_id
+            );
+
+            if (existingNotification) {
+                // If the token is different, update the token and other details
+                if (existingNotification.token !== push_notification_token) {
+                    existingNotification.token = push_notification_token;
+                    existingNotification.created_at = Date.now();
+                    existingNotification.islogin = true
+                }
+            } else {
+                // If no notification exists with this mobile_id, add a new entry
+                user.push_notifications.push({
+                    mobile_id,
+                    token: push_notification_token,
+                    device: deviceInfo.deviceType || "android",  // Assuming deviceType is provided
+                    created_at: Date.now(),
+                    islogin: true
+                });
+            }
+
+            // Save the user with updated push_notifications
+            await user.save();
         }
 
 
@@ -53,7 +85,8 @@ const UserLogin = async (req, res, next) => {
 
 
 const UserLogout = async (req, res, next) => {
-    const token = req.headers['authorization'];
+    const token = req.header('authorization')?.replace('Bearer ', ''); // Extract token from Authorization header
+    const { mobile_id } = req.body; // Assuming mobile_id is passed in the request body
     if (!token) {
         return res.status(403).json({ message: 'No token provided' });
     }
@@ -61,12 +94,25 @@ const UserLogout = async (req, res, next) => {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const userId = decoded.userId;
 
+
         // Find the latest session and mark as logged out
         const session = await Session.findOne({ userId }).sort({ loginAt: -1 }).limit(1);
         if (session) {
             await Session.updateOne({ _id: session._id }, { logoutAt: new Date() });
         }
 
+        const user = await Users.findById(userId)
+
+        // Check if mobile_id already exists in push_notifications array
+        const existingNotification = user.push_notifications.find(
+            (notif) => notif.mobile_id === mobile_id
+        );
+
+        if (existingNotification) {
+            existingNotification.islogin = false
+        }
+
+        await user.save();
         res.json({ message: 'Logged out successfully' });
     } catch (err) {
         return res.status(403).json({ message: 'Invalid token' });

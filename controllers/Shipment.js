@@ -5,6 +5,7 @@ const Users = require('../models/user');
 const nodemailer = require('nodemailer');
 const Counter = require("../models/shipmentCounter")
 
+
 const ShipmentNumber = async (req, res, next) => {
     const { userid } = req.body;
 
@@ -17,7 +18,7 @@ const ShipmentNumber = async (req, res, next) => {
         );
 
         // Generate the new shipment number using the incremented sequence value
-        const newShipmentNumber = `SHIPNUM-${counter.sequence_value.toString().padStart(6, '0')}`;
+        const newShipmentNumber = `SHIP-${counter.sequence_value.toString().padStart(6, '0')}`;
 
         // Create the new shipment document
         const shipment = new Shipments({
@@ -36,8 +37,6 @@ const ShipmentNumber = async (req, res, next) => {
         next(error);
     }
 };
-
-
 
 
 
@@ -132,9 +131,9 @@ const getAllShipments = async (req, res, next) => {
         // Modify filters based on the slug
         if (slug === 'security_gaurd') {
             // Add an additional filter for the 'Confirmed' status if the role is 'security_gaurd'
-            filters = { ...filters, shipment_status: 'Confirmed' };
+            filters = { ...filters, shipment_status: ['Confirmed', "GateIn", "Loaded"] };
         } else if (slug === "Munshi") {
-            filters = { ...filters, shipment_status: 'Assigned' };
+            filters = { ...filters, shipment_status: ['Assigned', 'Confirmed', "GateIn", "Loaded"] };
         }
 
         let shipments = []
