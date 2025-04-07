@@ -48,7 +48,7 @@ const registerUser = async (req, res, next) => {
 
 // Controller to edit user details
 const editUserDetails = async (req, res, next) => {
-    const {userId, username, first_name, last_name, email, mobile_no, gender, dob, avatar, roleid } = req.body;
+    const { userId, username, first_name, last_name, email, mobile_no, gender, dob, avatar, roleid } = req.body;
 
     try {
         // Check if the email already exists, excluding the current user's email
@@ -112,60 +112,93 @@ const getAllUsers = async (req, res, next) => {
 
     const pageSize = parseInt(page_size) || 10; // Default to 10 if page_size is not provided
     const pageNo = parseInt(page_no) || 1; // Default to 1 if page_no is not provided
-    const searchQuery = search ? { $text: { $search: search } } : {}; // Search filter
     const sortOrder = order === 'desc' ? -1 : 1; // Sort order (asc or desc)
 
+    // Initialize the search query object
+    let searchQuery = {};
+    const searchFilter = search
+    ? {
+        $or: [
+            { 'username': { $regex: search, $options: 'i' } }, 
+            { 'email': { $regex: search, $options: 'i' } }, 
+            { 'first_name': { $regex: search, $options: 'i' } }, 
+            { 'last_name': { $regex: search, $options: 'i' } }, 
+            { 'mobile_no': { $regex: search, $options: 'i' } },  
+        ]
+    }
+    : {}; 
     try {
-        // Calculate the skip and limit based on page size and page number
+        // Calculate pagination parameters
         const skip = (pageNo - 1) * pageSize;
         const limit = pageSize;
 
-        // Fetch the users with pagination and search filter, and populate the role
-        const users = await Users.find(searchQuery)
-            .populate("roleid", "slug") // Populate the role with only the slug field
-            .sort({ createdAt: sortOrder }) // Sorting by `createdAt`, adjust as needed
-            .skip(skip)
-            .limit(limit);
-
-
-
-        // Filter the users based on the role slug ('logistic_person' or 'security_gaurd')
-        const filteredUsers = users.filter(user =>
-            (user.roleid.slug === "logistic_person" || user.roleid.slug === "security_gaurd")
-        );
-
-
-        const totalCount = await Users.aggregate([
-            { $match: searchQuery },  // Apply the search query filter
+        // MongoDB Aggregation Pipeline
+        const users = await Users.aggregate([
+            // Stage 1: Match search query if provided
+            {
+                $match: searchQuery
+            },
+            // Stage 2: Lookup role details
             {
                 $lookup: {
-                    from: 'roles',  // Assuming the role collection is called "roles"
-                    localField: 'roleid',  // Field in Users collection
-                    foreignField: '_id',  // Field in Roles collection
-                    as: 'roleDetails'  // New field to hold the joined data
+                    from: 'roles', // Name of the roles collection
+                    localField: 'roleid', // The field in Users that references the roles collection
+                    foreignField: '_id', // The field in roles collection to match
+                    as: 'roleDetails' // The new field to hold the joined data
                 }
             },
-            { $unwind: '$roleDetails' },  // Flatten the joined role data
-            { $match: { 'roleDetails.slug': { $in: ["logistic_person", "security_gaurd"] } } },  // Filter by slugs
-            { $count: 'totalCount' }  // Count the number of matching users
+            // Stage 3: Unwind the roleDetails array (since $lookup creates an array)
+            {
+                $unwind: '$roleDetails'
+            },
+            // Stage 4: Filter users based on the role slugs (logistic_person or security_gaurd)
+            {
+                $match: {
+                    'roleDetails.slug': { $in: ['logistic_person', 'security_gaurd'] }
+                }
+            },
+            // Stage 5: Sort users by createdAt or another field
+            {
+                $sort: { createdAt: sortOrder }
+            },
+            // Stage 6: Paginate results
+            {
+                $skip: skip
+            },
+            {
+                $limit: limit
+            }
+        ]);
+
+        // Count the total number of users matching the search criteria
+        const totalCount = await Users.aggregate([
+            { $match: searchQuery }, // Apply the search query filter
+            {
+                $lookup: {
+                    from: 'roles', // Lookup roles
+                    localField: 'roleid',
+                    foreignField: '_id',
+                    as: 'roleDetails'
+                }
+            },
+            { $unwind: '$roleDetails' },
+            { $match: { 'roleDetails.slug': { $in: ['logistic_person', 'security_gaurd'] } } }, // Apply role filter
+            { $count: 'totalCount' }
         ]);
 
         // Extract total count from aggregation result
         const totalUsers = totalCount.length > 0 ? totalCount[0].totalCount : 0;
 
-        // Respond with paginated users and total count
+        // Respond with the results
         res.status(200).json({
-            usersListing: filteredUsers,
+            usersListing: users,
             totalUserCount: totalUsers
         });
     } catch (error) {
-        next(error); // Handle error if fetching users fails
+        console.error(error); // Log any errors
+        next(error); // Pass the error to the next middleware
     }
 };
-
-
-
-
 
 // Controller to delete user by ID
 const deleteUserById = async (req, res, next) => {
