@@ -6,7 +6,7 @@ const Roles = require("../models/role")
 
 // Controller to get all roles
 const UserLogin = async (req, res, next) => {
-    const { emailOrUsername, password, mobile_id, deviceInfo, push_notification_token } = req.body;
+    const { emailOrUsername, password, mobile_id, deviceInfo, token } = req.body;
 
     try {
 
@@ -27,16 +27,19 @@ const UserLogin = async (req, res, next) => {
 
 
         // Check and update push_notifications if mobile_id and token are provided
-        if (mobile_id && push_notification_token) {
+        if (mobile_id && token) {
             // Check if mobile_id already exists in push_notifications array
             const existingNotification = user.push_notifications.find(
                 (notif) => notif.mobile_id === mobile_id
             );
 
+            console.log("existingNotificationexistingNotification", existingNotification);
+            
+
             if (existingNotification) {
                 // If the token is different, update the token and other details
-                if (existingNotification.token !== push_notification_token) {
-                    existingNotification.token = push_notification_token;
+                if (existingNotification.token !== token) {
+                    existingNotification.token = token;
                     existingNotification.created_at = Date.now();
                     existingNotification.islogin = true
                 }
@@ -44,7 +47,7 @@ const UserLogin = async (req, res, next) => {
                 // If no notification exists with this mobile_id, add a new entry
                 user.push_notifications.push({
                     mobile_id,
-                    token: push_notification_token,
+                    token: token,
                     device: deviceInfo.deviceType || "android",  // Assuming deviceType is provided
                     created_at: Date.now(),
                     islogin: true

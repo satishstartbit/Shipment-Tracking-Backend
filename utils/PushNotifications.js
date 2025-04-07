@@ -1,14 +1,13 @@
-
 const { Expo } = require('expo-server-sdk');
 
 const Notifications = async (pushToken, title, body) => {
-
     // Create an instance of Expo
     let expo = new Expo();
 
     // Validate push token
     if (!Expo.isExpoPushToken(pushToken)) {
-        return res.status(400).json({ error: 'Invalid Expo push token' });
+        console.log("Invalid push token:", pushToken);
+        return { error: 'Invalid Expo push token' };
     }
 
     // Construct the message
@@ -29,11 +28,23 @@ const Notifications = async (pushToken, title, body) => {
             let ticketChunk = await expo.sendPushNotificationsAsync(chunk);
             tickets.push(...ticketChunk);
         }
+        console.log("Tickets sent successfully:", tickets);
 
-        return { success: true, tickets }
+        // Check for errors in the tickets
+        tickets.forEach(ticket => {
+            if (ticket.status === 'error') {
+                console.log(`Error sending notification: ${ticket.message}`);
+                if (ticket.details.error === 'DeviceNotRegistered') {
+                    console.log(`Push token is no longer registered: ${ticket.details.expoPushToken}`);
+                    // Handle invalid token cleanup (e.g., remove from database)
+                }
+            }
+        });
+
+        return { success: true, tickets };
     } catch (error) {
-
-        return { success: false, error: 'Failed to send notification' }
+        console.error("Error sending notifications:", error);
+        return { success: false, error: 'Failed to send notification' };
     }
 };
 
