@@ -355,14 +355,14 @@ const assignShipmentToCompany = async (req, res, next) => {
 
         const TransportCompanys = await TransportCompany.findById(shipment.companyId)
 
-        
+
 
         // Return the updated shipment with company details
         res.status(200).json({
             message: "Shipment assigned to company successfully",
             shipment,
             TransportCompanys,
-            munshiuser:munshiuser
+            munshiuser: munshiuser
         });
     } catch (error) {
         next(error); // Pass the error to the error-handling middleware
@@ -415,48 +415,45 @@ const getAllTruckTypes = async (req, res, next) => {
 
 
 const assignDockNumber = async (req, res, next) => {
-    const { shipmentId } = req.params; // Shipment ID passed as a URL parameter
+    const { shipmentId, dock_number } = req.body; // Shipment ID and dock_number passed in the request body
 
     try {
         // Step 1: Fetch the existing shipment by shipmentId
         const shipment = await Shipments.findById(shipmentId);
 
         if (!shipment) {
-            return res.status(404).json({ message: 'Shipment not found' });
-        }
-
-        // Step 2: Check if the dock_number is already assigned
-        if (shipment.dock_number) {
-            // If dock_number is already assigned, return the current status
-            return res.status(200).json({
-                message: 'Dock number already assigned',
-                dock_number: shipment.dock_number
+            return res.status(404).json({
+                success: false,
+                message: 'Shipment not found'
             });
         }
 
-        // Step 3: Generate a unique dock_number if not already assigned
-        const lastShipment = await Shipments.findOne().sort({ dock_number: -1 }).limit(1); // Get the latest shipment (if any)
-        let newDockNumber = 'DOCK_Number-000001'; // Default if no shipments exist
+        // Step 2: Check if the dock_number already exists for another shipment
+        const existingDock = await Shipments.findOne({ dock_number });
 
-        if (lastShipment && lastShipment.dock_number) {
-            // Increment the last dock_number if shipments exist
-            const lastDockNumber = lastShipment.dock_number;
-            const numericPart = parseInt(lastDockNumber.split('-')[1]);
-            const nextNumericPart = numericPart + 1;
-            newDockNumber = `DOCK_Number-${nextNumericPart.toString().padStart(6, '0')}`;
+        if (existingDock) {
+            return res.status(400).json({
+                success: false,
+                message: 'Dock number is already in use'
+            });
         }
 
-        // Step 4: Update the shipment with the new dock_number and set shipment_status  to "Loaded"
-        shipment.dock_number = newDockNumber;
+        // Step 3: Assign the dock number and update shipment status
+        shipment.dock_number = dock_number;
         shipment.shipment_status = 'Loaded';
 
-        // Step 5: Save the updated shipment
+        // Step 4: Save the updated shipment
         const updatedShipment = await shipment.save();
 
-        // Step 6: Return the updated shipment
-        res.status(200).json({ shipment: updatedShipment });
+        // Step 5: Return the updated shipment with a success message
+        res.status(200).json({
+            success: true,
+            message: 'Dock number assigned successfully',
+            shipment: updatedShipment
+        });
     } catch (error) {
-        next(error); // Pass the error to the next middleware
+        // Pass the error to the next middleware
+        next(error);
     }
 };
 
