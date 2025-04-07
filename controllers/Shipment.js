@@ -150,9 +150,13 @@ const getAllShipments = async (req, res, next) => {
 
             // Retrieve the shipments with filters, pagination, and sorting
             shipments = await Shipments.find(filters)
+                .populate({
+                    path: 'companyId', // Populate the 'companyId' field
+                    match: { 'munshiId': userid }, // Filter on the 'munshiId' field of the referenced document
+                    select: '', // Select the fields you want to include from the populated document
+                })
                 .populate('truckTypeId', '')  // Populate the truck type data
                 .populate('TruckId', '')
-                .populate('companyId', '')
                 .sort({ created_at: sortOrder })  // Sort by created_at or any other field as needed
                 .skip(skip)  // Pagination: skip records based on page
                 .limit(limit)  // Pagination: limit number of records per page
@@ -164,12 +168,7 @@ const getAllShipments = async (req, res, next) => {
         } else {
             // Retrieve the shipments with filters, pagination, and sorting
             shipments = await Shipments.find(filters)
-                .populate({
-                    path: 'companyId', // Populate the 'companyId' field
-                    match: { 'munshiId': userid }, // Filter on the 'munshiId' field of the referenced document
-                    select: '', // Select the fields you want to include from the populated document
-                })
-                .populate('createdBy', '')  // Populate user data
+                .populate('companyId', '')  // Populate the company deails data
                 .populate('truckTypeId', '')  // Populate the truck type data
                 .populate('TruckId', '')
                 .sort({ created_at: sortOrder })  // Sort by created_at or any other field as needed
