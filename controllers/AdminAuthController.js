@@ -6,10 +6,10 @@ const { generateRefreshToken } = require('../utils/generateRefreshToken');
 // Controller to login the user and return both access and refresh tokens
 const loginUser = async (req, res) => {
   const { email, password } = req.body;
-
+  let isemail = email?.toLowerCase()
   try {
     // Check if the user exists
-    const user = await Users.findOne({ email });
+    const user = await Users.findOne({ isemail });
 
     if (!user) {
       return res.status(400).json({ message: 'Invalid email or password' });
