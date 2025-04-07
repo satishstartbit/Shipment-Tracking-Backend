@@ -1,3 +1,5 @@
+// Core modules and third-party packages
+
 const path = require("path");
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -7,7 +9,7 @@ require("dotenv").config();
 
 
 
-
+// Importing route modules
 const userRoutes = require("./routes/AdminuserRoutes"); // Your user routes
 const MobileRoutes = require("./routes/MobileUserRoutes");
 const companyRoutes = require("./routes/AdmincompanyRoutes"); // Your user routes
@@ -16,13 +18,13 @@ const ShipmentRoutes = require("./routes/ShipmentRoutes"); // Your user routes
 
 const verifyToken = require('./utils/VerifyToken'); // Import the verifyToken middleware
 
-
+// Initialize the Express app
 const app = express();
 
 
-
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+// Middleware setup
+app.use(bodyParser.urlencoded({ extended: false })); // Parse URL-encoded payloads
+app.use(bodyParser.json()); // Parse JSON payloads
 app.use(cors({
     origin:"*"
 }))
