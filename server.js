@@ -25,6 +25,8 @@ const app = express();
 // Middleware setup
 app.use(bodyParser.urlencoded({ extended: false })); // Parse URL-encoded payloads
 app.use(bodyParser.json()); // Parse JSON payloads
+
+// Enable CORS for all origins
 app.use(cors({
     origin:"*"
 }))
@@ -32,9 +34,7 @@ app.use(cors({
 const PORT = process.env.PORT || 3000;
 const DB_URL = process.env.DATABASE_URL;
 
-
-
-
+// Set CORS headers for all responses
 app.use((req, res, next) => {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader(
@@ -45,6 +45,7 @@ app.use((req, res, next) => {
     next();
 });
 
+// API route definitions
 app.use("/api/role",verifyToken, roleRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/company",verifyToken, companyRoutes);
@@ -56,7 +57,7 @@ app.get('/', (req, res) => {
 });
 
 
-
+// Global error handling middleware
 app.use((error, req, res, next) => {
     console.error(error);
     res.status(error.statusCode || 500).json({
@@ -65,7 +66,7 @@ app.use((error, req, res, next) => {
     });
 });
 
-
+// Database connection
 
 mongoose
     .connect(DB_URL)
@@ -76,7 +77,8 @@ mongoose
         console.error("❌ Failed to connect to MongoDB", err);
         process.exit(1);
     });
-
+    
+// Start the server
 app.listen(PORT, () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
