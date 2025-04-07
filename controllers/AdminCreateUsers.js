@@ -114,6 +114,7 @@ const getAllUsers = async (req, res, next) => {
     const pageNo = parseInt(page_no) || 1; // Default to 1 if page_no is not provided
     const sortOrder = order === 'desc' ? -1 : 1; // Sort order (asc or desc)
 
+    
     // Initialize the search query object
     let searchQuery = {};
     const searchFilter = search
