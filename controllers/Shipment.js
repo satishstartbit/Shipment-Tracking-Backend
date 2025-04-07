@@ -120,8 +120,12 @@ const getAllShipments = async (req, res, next) => {
         const searchFilter = search
             ? {
                 $or: [
-                    { 'createdBy.first_name': { $regex: search, $options: 'i' } },
-                    { 'createdBy.last_name': { $regex: search, $options: 'i' } },
+                    { 'dock_number': { $regex: search, $options: 'i' } },
+                    { 'shipment_status': { $regex: search, $options: 'i' } },
+                    { 'shipment_number': { $regex: search, $options: 'i' } },
+                    { 'destination_city': { $regex: search, $options: 'i' } },
+                    { 'TruckId.driver_name': { $regex: search, $options: 'i' } },
+                    { 'TruckId.truck_number': { $regex: search, $options: 'i' } }
                 ]
             }
             : {};  // If search is provided, match it on first name or last name, otherwise no filter
