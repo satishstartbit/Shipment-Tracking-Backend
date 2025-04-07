@@ -336,6 +336,9 @@ const assignShipmentToCompany = async (req, res, next) => {
                     </html>`
         };
 
+
+
+
         // Send email
         transporter.sendMail(mailOptions, (error, info) => {
             if (error) {
@@ -349,10 +352,17 @@ const assignShipmentToCompany = async (req, res, next) => {
         // Save the updated shipment
         await shipment.save();
 
+
+        const TransportCompanys = await TransportCompany.findById(shipment.companyId)
+
+        
+
         // Return the updated shipment with company details
         res.status(200).json({
             message: "Shipment assigned to company successfully",
             shipment,
+            TransportCompanys,
+            munshiuser:munshiuser
         });
     } catch (error) {
         next(error); // Pass the error to the error-handling middleware
