@@ -132,7 +132,7 @@ const getAllShipments = async (req, res, next) => {
 
         // Initialize the filters object
         let filters = { ...searchFilter, active: true };
-
+        
         // Modify filters based on the slug
         if (slug === 'security_gaurd') {
             // Add an additional filter for the 'Confirmed' status if the role is 'security_gaurd'
@@ -148,15 +148,18 @@ const getAllShipments = async (req, res, next) => {
                 return res.status(404).json({ message: 'User ID can not ne null' });
             }
 
-            // Retrieve the shipments with filters, pagination, and sorting
             shipments = await Shipments.find(filters)
                 .populate({
                     path: 'companyId', // Populate the 'companyId' field
-                    match: { 'munshiId': userid }, // Filter on the 'munshiId' field of the referenced document
-                    select: '', // Select the fields you want to include from the populated document
+                    populate: {
+                        path: 'munshiId',  // Reference to the 'munshiId' field inside 'companyId'
+                        model: 'Users',  // Specify the model of the 'munshiId' field (should be 'Users' collection)
+                        select: '',  // Optionally specify which fields to include from 'Users' (leave empty for all fields)
+                    },
+                    select: '',  // Optionally specify which fields you want to include from 'companyId' (leave empty for all fields)
                 })
                 .populate('truckTypeId', '')  // Populate the truck type data
-                .populate('TruckId', '')
+                .populate('TruckId', '')  // Populate the TruckId field
                 .sort({ created_at: sortOrder })  // Sort by created_at or any other field as needed
                 .skip(skip)  // Pagination: skip records based on page
                 .limit(limit)  // Pagination: limit number of records per page
@@ -166,15 +169,29 @@ const getAllShipments = async (req, res, next) => {
             totalShipments = await Shipments.countDocuments(filters);
 
         } else {
+
+            console.log("filtersfilters", filters);
+
             // Retrieve the shipments with filters, pagination, and sorting
             shipments = await Shipments.find(filters)
-                .populate('companyId', '')  // Populate the company deails data
+                .populate({
+                    path: 'companyId', // Populate the 'companyId' field
+                    populate: {
+                        path: 'munshiId',  // Reference to the 'munshiId' field inside 'companyId'
+                        model: 'Users',  // Specify the model of the 'munshiId' field (should be 'Users' collection)
+                        select: '',  // Optionally specify which fields to include from 'Users' (leave empty for all fields)
+                    },
+                    select: '',  // Optionally specify which fields you want to include from 'companyId' (leave empty for all fields)
+                })
                 .populate('truckTypeId', '')  // Populate the truck type data
                 .populate('TruckId', '')
                 .sort({ created_at: sortOrder })  // Sort by created_at or any other field as needed
                 .skip(skip)  // Pagination: skip records based on page
                 .limit(limit)  // Pagination: limit number of records per page
                 .exec();
+
+
+
 
             // Count the total number of shipments for pagination info
             totalShipments = await Shipments.countDocuments(filters);
