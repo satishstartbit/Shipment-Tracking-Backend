@@ -16,8 +16,7 @@ const shipmentSchema = new Schema({
         ref: "TransportCompany",
     },
     dock_number: {
-        type: String,
-        unique: true
+        type: String
     },
     truckTypeId: {
         type: Schema.Types.ObjectId,
