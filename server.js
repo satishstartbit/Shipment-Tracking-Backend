@@ -50,7 +50,7 @@ app.use("/api/role",verifyToken, roleRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/company",verifyToken, companyRoutes);
 app.use("/mobile", MobileRoutes)
-app.use("/shipment", ShipmentRoutes)
+app.use("/shipment",verifyToken, ShipmentRoutes)
 
 app.get('/', (req, res) => {
     res.send('Hello, World!');

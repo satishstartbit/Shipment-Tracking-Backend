@@ -132,7 +132,7 @@ const getAllShipments = async (req, res, next) => {
 
         // Initialize the filters object
         let filters = { ...searchFilter, active: true };
-        
+
         // Modify filters based on the slug
         if (slug === 'security_gaurd') {
             // Add an additional filter for the 'Confirmed' status if the role is 'security_gaurd'
@@ -170,7 +170,6 @@ const getAllShipments = async (req, res, next) => {
 
         } else {
 
-            console.log("filtersfilters", filters);
 
             // Retrieve the shipments with filters, pagination, and sorting
             shipments = await Shipments.find(filters)

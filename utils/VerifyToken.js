@@ -6,8 +6,8 @@ const JWT_SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
 // Middleware function to verify JWT token
 const verifyToken = (req, res, next) => {
     const token = req.header('authorization')?.replace('Bearer ', ''); // Extract token from Authorization header
-    console.log("token", req.header("Authorization") );
-    
+    console.log("token", req.header("Authorization"));
+
 
     if (!token) {
         return res.status(401).json({ message: 'Access denied. No token provided.' });
@@ -23,7 +23,7 @@ const verifyToken = (req, res, next) => {
         req.user = decoded; // Attach decoded data (user information) to the request object
         next(); // Proceed to the next middleware or controller
     } catch (error) {
-        return res.status(400).json({ message: 'Invalid token.' });
+        return res.status(400).json({ message: 'Invalid token.', TokenExpired: false });
     }
 };
 
