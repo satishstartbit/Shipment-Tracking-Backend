@@ -3,7 +3,7 @@ const Shipments = require("../models/shipment")
 
 const AddTruckDetails = async (req, res, next) => {
     try {
-        const { driver_name, mobile_number, truck_number, shipmentId, created_by } = req.body;
+        const { driver_name, mobile_number, truck_number, shipmentId, created_by , arrival_date} = req.body;
 
         // Check if all required fields are provided
         if (!driver_name || !mobile_number || !truck_number || !shipmentId || !created_by) {
@@ -28,7 +28,8 @@ const AddTruckDetails = async (req, res, next) => {
                 truck_number,
                 shipmentId,
                 created_by,
-                updated_by: created_by
+                updated_by: created_by,
+                arrival_date
             });
 
 

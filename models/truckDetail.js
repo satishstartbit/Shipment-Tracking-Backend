@@ -24,6 +24,9 @@ const truckDetailSchema = new Schema({
         ref: "Users",
         required: true
     },
+    arrival_date: {
+        type: Date
+    },
     created_at: {
         type: Date,
         default: Date.now
