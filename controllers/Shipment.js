@@ -229,7 +229,7 @@ const getAllShipments = async (req, res, next) => {
 
 // Assign a shipment to company 
 const assignShipmentToCompany = async (req, res, next) => {
-    const { shipmentId, companyId, mobile_number } = req.body; // shipmentId and companyId passed in the request body
+    const { shipmentId, companyId, mobile_number, updated_at } = req.body; // shipmentId and companyId passed in the request body
 
 
     const transporter = nodemailer.createTransport({
@@ -266,7 +266,7 @@ const assignShipmentToCompany = async (req, res, next) => {
         shipment.companyId = companyId;
         shipment.mobile_number = mobile_number;
         shipment.shipment_status = "Assigned"
-
+        shipment.updated_at = updated_at
 
         const user = await Users.findById(shipment.createdBy)
         const munshiuser = await Users.findById(company.munshiId)
