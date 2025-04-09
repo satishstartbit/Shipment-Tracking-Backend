@@ -231,7 +231,7 @@ const getAllShipments = async (req, res, next) => {
 const assignShipmentToCompany = async (req, res, next) => {
     const { shipmentId, companyId, mobile_number, updated_at } = req.body; // shipmentId and companyId passed in the request body
 
-console.log("updated_atupdated_at", updated_at);
+    console.log("updated_atupdated_at", updated_at);
 
     const transporter = nodemailer.createTransport({
         service: 'gmail',
