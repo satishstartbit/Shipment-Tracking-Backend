@@ -266,7 +266,14 @@ const assignShipmentToCompany = async (req, res, next) => {
         const munshiuser = await Users.findById(company.munshiId)
 
 
-
+        if ((munshiuser?.push_notifications ?? [])?.length > 0) {
+            await (munshiuser?.push_notifications ?? [])?.some((item) => item?.islogin == true)?.map((item) => {
+                return Notifications(item?.token,
+                    "New Shipment Assigned to Your Company",
+                    `A new shipment has been assigned to ${company?.company_name}. Please provide truck details. Shipment No: ${shipment?.shipment_number}, Status: ${shipment?.shipment_status}.`
+                )
+            })
+        }
 
         // Set up email message
         const mailOptions = {

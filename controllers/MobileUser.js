@@ -6,7 +6,7 @@ const Roles = require("../models/role")
 
 // Controller to get all roles
 const UserLogin = async (req, res, next) => {
-    const { emailOrUsername, password, mobile_id, deviceInfo, token } = req.body;
+    const { emailOrUsername, password, mobile_id, deviceInfo, push_notification_token } = req.body;
 
     try {
 
@@ -27,19 +27,18 @@ const UserLogin = async (req, res, next) => {
 
 
         // Check and update push_notifications if mobile_id and token are provided
-        if (mobile_id && token) {
+        if (mobile_id && push_notification_token) {
             // Check if mobile_id already exists in push_notifications array
             const existingNotification = user.push_notifications.find(
                 (notif) => notif.mobile_id === mobile_id
             );
 
-            console.log("existingNotificationexistingNotification", existingNotification);
-            
+
 
             if (existingNotification) {
                 // If the token is different, update the token and other details
-                if (existingNotification.token !== token) {
-                    existingNotification.token = token;
+                if (existingNotification.token !== push_notification_token) {
+                    existingNotification.token = push_notification_token;
                     existingNotification.created_at = Date.now();
                     existingNotification.islogin = true
                 }
@@ -47,7 +46,7 @@ const UserLogin = async (req, res, next) => {
                 // If no notification exists with this mobile_id, add a new entry
                 user.push_notifications.push({
                     mobile_id,
-                    token: token,
+                    token: push_notification_token,
                     device: deviceInfo.deviceType || "android",  // Assuming deviceType is provided
                     created_at: Date.now(),
                     islogin: true
@@ -89,7 +88,7 @@ const UserLogin = async (req, res, next) => {
 
 const UserLogout = async (req, res, next) => {
     const token = req.header('authorization')?.replace('Bearer ', ''); // Extract token from Authorization header
-    const { mobile_id } = req.body; // Assuming mobile_id is passed in the request body
+    const { push_notification_token } = req.body; // Assuming mobile_id is passed in the request body
     if (!token) {
         return res.status(403).json({ message: 'No token provided' });
     }
@@ -108,7 +107,7 @@ const UserLogout = async (req, res, next) => {
 
         // Check if mobile_id already exists in push_notifications array
         const existingNotification = user.push_notifications.find(
-            (notif) => notif.mobile_id === mobile_id
+            (notif) => notif.token === push_notification_token
         );
 
         if (existingNotification) {
