@@ -276,7 +276,12 @@ const assignShipmentToCompany = async (req, res, next) => {
             await (munshiuser?.push_notifications ?? [])?.map((item) => {
                 return Notifications(item?.token,
                     "New Shipment Assigned to Your Company",
-                    `A new shipment has been assigned to ${company?.company_name}. Please provide truck details. Shipment No: ${shipment?.shipment_number}, Status: ${shipment?.shipment_status}.`
+                    `A new shipment has been assigned to ${company?.company_name}. Please provide truck details. Shipment No: ${shipment?.shipment_number}, Status: ${shipment?.shipment_status}.`,
+                    {
+                        "screen": "assignTruck",
+                        "shipmentId": shipment?.shipment_number
+                    }
+
                 )
             })
         }
@@ -487,7 +492,8 @@ const assignDockNumber = async (req, res, next) => {
             await (munshiuser?.push_notifications ?? [])?.map((item) => {
                 return Notifications(item?.token,
                     "Assigned Dock Number",
-                    `Dock number ${shipment?.dock_number} has been assigned to this shipment. Please contact your truck driver for further details. Shipment No: ${shipment?.shipment_number} Status: ${shipment?.shipment_status}.`
+                    `Dock number ${shipment?.dock_number} has been assigned to this shipment. Please contact your truck driver for further details. Shipment No: ${shipment?.shipment_number} Status: ${shipment?.shipment_status}.`,
+                    { someData: 'example' }
                 )
             })
         }

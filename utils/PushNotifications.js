@@ -1,6 +1,6 @@
 const { Expo } = require('expo-server-sdk');
 
-const Notifications = async (pushToken, title, body) => {
+const Notifications = async (pushToken, title, body , data) => {
     // Create an instance of Expo
     let expo = new Expo();
 
@@ -16,7 +16,7 @@ const Notifications = async (pushToken, title, body) => {
         sound: 'default',
         title: title,
         body: body,
-        data: { someData: 'example' },
+        data: data,
     };
 
     // Chunk the notifications if sending multiple at once
