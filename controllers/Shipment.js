@@ -76,7 +76,7 @@ const createShipment = async (req, res, next) => {
     }
 };
 
-
+//Get Shipment Details
 const getShipmentDetails = async (req, res, next) => {
     const { id } = req.params; // Assuming the shipment ID is passed in the URL
 
@@ -103,7 +103,7 @@ const getShipmentDetails = async (req, res, next) => {
 
 
 
-
+// Get all shipments
 const getAllShipments = async (req, res, next) => {
 
     try {
@@ -225,7 +225,7 @@ const getAllShipments = async (req, res, next) => {
 
 
 
-
+// Assign a shipment to company 
 const assignShipmentToCompany = async (req, res, next) => {
     const { shipmentId, companyId, mobile_number } = req.body; // shipmentId and companyId passed in the request body
 
@@ -404,7 +404,7 @@ const assignShipmentToCompany = async (req, res, next) => {
 
 
 
-
+// Insert API for Truck Types
 
 const createTruckType = async (req, res, next) => {
     const { name, description, } = req.body;
