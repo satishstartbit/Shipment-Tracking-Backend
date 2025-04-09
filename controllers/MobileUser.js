@@ -3,8 +3,9 @@ const Session = require('../models/session');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const Roles = require("../models/role")
+const TransportCompany = require('../models/transportCompany');
 
-// Controller to get all roles
+// Controller to get all roles and login user 
 const UserLogin = async (req, res, next) => {
     const { emailOrUsername, password, mobile_id, deviceInfo, push_notification_token } = req.body;
 
@@ -58,7 +59,7 @@ const UserLogin = async (req, res, next) => {
         }
 
 
-        // Generate JWT token (expires in 1 hour)
+        // Generate JWT token (expires in 60 days)
         const accessToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRATION });
 
         // Store the session with device info
@@ -73,13 +74,18 @@ const UserLogin = async (req, res, next) => {
         await newSession.save();
 
 
-        const roles = await Roles.findById(user?.roleid); // Fetch all roles        
+        const roles = await Roles.findById(user?.roleid); // Fetch all roles    
 
+        if (roles?.slug === "Munshi") {
+            const company = await TransportCompany.find({ munshiId: user?._id });
+            res.status(200).json({ accessToken, user, roles, company });
+        } else {
+            // Send the response back
+            res.status(200).json({ accessToken, user, roles });
+        }
 
-        // Send the response back
-        res.status(200).json({ accessToken, user, roles });
     } catch (error) {
-        console.log("sdcv");
+        console.log("error is occured", error);
         next(error); // Handle error if fetching roles fails
     }
 };
