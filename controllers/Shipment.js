@@ -483,7 +483,7 @@ const assignDockNumber = async (req, res, next) => {
 
 
         if ((munshiuser?.push_notifications ?? [])?.length > 0) {
-            await (munshiuser?.push_notifications ?? [])?.some((item) => item?.islogin == true)?.map((item) => {
+            await (munshiuser?.push_notifications ?? [])?.map((item) => {
                 return Notifications(item?.token,
                     "Assigned Dock Number",
                     `Dock number ${shipment?.dock_number} has been assigned to this shipment. Please contact your truck driver for further details.
