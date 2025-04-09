@@ -9,6 +9,8 @@ const TransportCompany = require('../models/transportCompany');
 const UserLogin = async (req, res, next) => {
     const { emailOrUsername, password, mobile_id, deviceInfo, push_notification_token } = req.body;
 
+    console.log("login", mobile_id, deviceInfo, push_notification_token);
+
     try {
 
         // Find the user by email or username
@@ -29,12 +31,15 @@ const UserLogin = async (req, res, next) => {
 
         // Check and update push_notifications if mobile_id and token are provided
         if (mobile_id && push_notification_token) {
+
+
             // Check if mobile_id already exists in push_notifications array
             const existingNotification = user.push_notifications.find(
                 (notif) => notif.mobile_id === mobile_id
             );
 
 
+            console.log("existingNotification", existingNotification, push_notification_token);
 
             if (existingNotification) {
                 // If the token is different, update the token and other details
