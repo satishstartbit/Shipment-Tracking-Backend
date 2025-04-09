@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Shipments = require("../models/shipment")
 const TruckTypes = require("../models/truckType")
 const TransportCompany = require('../models/transportCompany');
@@ -108,7 +109,7 @@ const getAllShipments = async (req, res, next) => {
 
     try {
         // Destructure query parameters from the request
-        const { page_size = 10, page_no = 1, search = '', order = 'asc', slug = 'logistic_person', userid = null } = req.body;
+        const { page_size = 10, page_no = 1, search = '', order = 'asc', slug = 'logistic_person', companyid = null } = req.body;
 
         // Create the pagination and ordering logic
         const skip = (page_no - 1) * page_size;  // For skipping records based on page number
@@ -139,16 +140,16 @@ const getAllShipments = async (req, res, next) => {
             filters = { ...filters, shipment_status: ['Confirmed', "GateIn", "Loaded"] };
         } else if (slug === "Munshi") {
             filters = {
-                ...filters, shipment_status: ['Assigned', 'Confirmed', "GateIn", "Loaded"],
-                'companyId.munshiId': userid
+                ...filters, shipment_status: ['Assigned', 'Confirmed', "GateIn", "Loaded"]
             };
+            filters.companyId = new mongoose.Types.ObjectId(companyid);  // Convert the companyId to ObjectId type
         }
 
         let shipments = []
         let totalShipments = 0
         if (slug === "Munshi") {
-            if (!userid) {
-                return res.status(404).json({ message: 'User ID can not ne null' });
+            if (!companyid) {
+                return res.status(404).json({ message: 'Comapny ID can not ne null' });
             }
 
             shipments = await Shipments.find(filters)
@@ -484,8 +485,10 @@ const assignDockNumber = async (req, res, next) => {
         if ((munshiuser?.push_notifications ?? [])?.length > 0) {
             await (munshiuser?.push_notifications ?? [])?.some((item) => item?.islogin == true)?.map((item) => {
                 return Notifications(item?.token,
-                    "New Shipment Assigned to Your Company",
-                    `A new shipment has been assigned to ${company?.company_name}. Please provide truck details. Shipment No: ${shipment?.shipment_number}, Status: ${shipment?.shipment_status}.`
+                    "Assigned Dock Number",
+                    `Dock number ${shipment?.dock_number} has been assigned to this shipment. Please contact your truck driver for further details.
+                     Shipment No: ${shipment?.shipment_number}
+                     Status: ${shipment?.shipment_status}.`
                 )
             })
         }
