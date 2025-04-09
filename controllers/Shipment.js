@@ -138,7 +138,10 @@ const getAllShipments = async (req, res, next) => {
             // Add an additional filter for the 'Confirmed' status if the role is 'security_gaurd'
             filters = { ...filters, shipment_status: ['Confirmed', "GateIn", "Loaded"] };
         } else if (slug === "Munshi") {
-            filters = { ...filters, shipment_status: ['Assigned', 'Confirmed', "GateIn", "Loaded"] };
+            filters = {
+                ...filters, shipment_status: ['Assigned', 'Confirmed', "GateIn", "Loaded"],
+                'companyId.munshiId': userid
+            };
         }
 
         let shipments = []
@@ -155,6 +158,7 @@ const getAllShipments = async (req, res, next) => {
                         path: 'munshiId',  // Reference to the 'munshiId' field inside 'companyId'
                         model: 'Users',  // Specify the model of the 'munshiId' field (should be 'Users' collection)
                         select: '',  // Optionally specify which fields to include from 'Users' (leave empty for all fields)
+
                     },
                     select: '',  // Optionally specify which fields you want to include from 'companyId' (leave empty for all fields)
                 })
@@ -267,7 +271,7 @@ const assignShipmentToCompany = async (req, res, next) => {
 
 
         if ((munshiuser?.push_notifications ?? [])?.length > 0) {
-            await (munshiuser?.push_notifications ?? [])?.some((item) => item?.islogin == true)?.map((item) => {
+            await (munshiuser?.push_notifications ?? [])?.map((item) => {
                 return Notifications(item?.token,
                     "New Shipment Assigned to Your Company",
                     `A new shipment has been assigned to ${company?.company_name}. Please provide truck details. Shipment No: ${shipment?.shipment_number}, Status: ${shipment?.shipment_status}.`
@@ -469,6 +473,22 @@ const assignDockNumber = async (req, res, next) => {
         // Step 3: Assign the dock number and update shipment status
         shipment.dock_number = dock_number;
         shipment.shipment_status = 'Loaded';
+
+
+        // Find the company by its ID (assuming you have a Company model)
+        const company = await TransportCompany.findById(shipment?.companyId);
+
+        const munshiuser = await Users.findById(company.munshiId)
+
+
+        if ((munshiuser?.push_notifications ?? [])?.length > 0) {
+            await (munshiuser?.push_notifications ?? [])?.some((item) => item?.islogin == true)?.map((item) => {
+                return Notifications(item?.token,
+                    "New Shipment Assigned to Your Company",
+                    `A new shipment has been assigned to ${company?.company_name}. Please provide truck details. Shipment No: ${shipment?.shipment_number}, Status: ${shipment?.shipment_status}.`
+                )
+            })
+        }
 
         // Step 4: Save the updated shipment
         const updatedShipment = await shipment.save();
