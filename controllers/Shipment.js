@@ -115,6 +115,7 @@ const getAllShipments = async (req, res, next) => {
         const skip = (page_no - 1) * page_size;  // For skipping records based on page number
         const limit = parseInt(page_size); // Number of records to fetch
         const sortOrder = order === 'desc' ? -1 : 1;  // Sort order (ascending or descending)
+        console.log("test");
 
 
         // Build the search filter
@@ -486,9 +487,7 @@ const assignDockNumber = async (req, res, next) => {
             await (munshiuser?.push_notifications ?? [])?.map((item) => {
                 return Notifications(item?.token,
                     "Assigned Dock Number",
-                    `Dock number ${shipment?.dock_number} has been assigned to this shipment. Please contact your truck driver for further details.
-                     Shipment No: ${shipment?.shipment_number}
-                     Status: ${shipment?.shipment_status}.`
+                    `Dock number ${shipment?.dock_number} has been assigned to this shipment. Please contact your truck driver for further details. Shipment No: ${shipment?.shipment_number} Status: ${shipment?.shipment_status}.`
                 )
             })
         }
