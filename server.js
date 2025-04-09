@@ -1,13 +1,10 @@
 // Core modules and third-party packages
-
-const path = require("path");
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const cors = require("cors")
 require("dotenv").config();
 
-const admin = require("firebase-admin");
 
 // Importing route modules
 const userRoutes = require("./routes/AdminuserRoutes"); // Your user routes
@@ -48,13 +45,6 @@ app.use((req, res, next) => {
 });
 
 
-
-// Initialize Firebase Admin SDK with your service account key
-admin.initializeApp({
-    credential: admin.credential.cert(
-        require("./serviceAccountKey.json")
-    ),
-});
 
 
 
