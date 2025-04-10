@@ -110,7 +110,7 @@ const getShipmentDetails = async (req, res, next) => {
                 // Return the populated shipment details
                 console.log("TransportCompanyinfo", TransportCompanyinfo);
 
-                res.status(200).json({ shipment, sucess: false, massage: "This shipment is assigned to a different transport company." });
+                res.status(200).json({ shipment, sucess: false, massage: "This shipment is Reassigned to a different transport company." });
             }
 
         } else {
