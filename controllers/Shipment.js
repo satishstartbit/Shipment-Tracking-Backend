@@ -158,10 +158,10 @@ const getAllShipments = async (req, res, next) => {
         // Modify filters based on the slug
         if (slug === 'security_gaurd') {
             // Add an additional filter for the 'Confirmed' status if the role is 'security_gaurd'
-            filters = { ...filters, shipment_status: ['Confirmed', "GateIn", "Loaded"] };
+            filters = { ...filters, shipment_status: ['Confirmed', "GateIn", "Loading", "Loaded"] };
         } else if (slug === "Munshi") {
             filters = {
-                ...filters, shipment_status: ['Assigned', 'Confirmed', "GateIn", "Loaded"]
+                ...filters, shipment_status: ['Assigned', 'Confirmed', "GateIn", "Loading", "Loaded"]
             };
             filters.companyId = new mongoose.Types.ObjectId(companyid);  // Convert the companyId to ObjectId type
         }
@@ -604,5 +604,5 @@ const getInTruck = async (req, res, next) => {
 module.exports = {
     createShipment, createTruckType, getShipmentDetails,
     getAllShipments, getAllTruckTypes, assignShipmentToCompany,
-    assignDockNumber, getInTruck, ShipmentNumber , shipmentLoaded
+    assignDockNumber, getInTruck, ShipmentNumber, shipmentLoaded
 };
