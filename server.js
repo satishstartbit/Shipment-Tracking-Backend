@@ -18,7 +18,6 @@ const verifyToken = require('./utils/VerifyToken'); // Import the verifyToken mi
 // Initialize the Express app
 const app = express();
 
-
 // Middleware setup
 app.use(bodyParser.urlencoded({ extended: false })); // Parse URL-encoded payloads
 app.use(bodyParser.json()); // Parse JSON payloads
@@ -31,8 +30,6 @@ app.use(cors({
 const PORT = process.env.PORT || 3000;
 const DB_URL = process.env.DATABASE_URL;
 
-
-
 // Set CORS headers for all responses
 app.use((req, res, next) => {
     res.setHeader("Access-Control-Allow-Origin", "*");
@@ -43,14 +40,6 @@ app.use((req, res, next) => {
     res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
     next();
 });
-
-
-
-
-
-
-
-
 
 // API route definitions
 app.use("/api/role", verifyToken, roleRoutes);

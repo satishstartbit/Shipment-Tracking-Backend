@@ -42,8 +42,6 @@ const ShipmentNumber = async (req, res, next) => {
     }
 };
 
-
-
 const createShipment = async (req, res, next) => {
     const { shipment_id, truckTypeId, destination_pin_code, destination_city,
         destination_state, userid, destination_country, actual_arrival_date } = req.body;
@@ -121,8 +119,6 @@ const getShipmentDetails = async (req, res, next) => {
         next(error); // Pass the error to the error-handling middleware
     }
 };
-
-
 
 // Get all shipments
 const getAllShipments = async (req, res, next) => {
@@ -242,10 +238,6 @@ const getAllShipments = async (req, res, next) => {
         next(error);  // Pass the error to the error-handling middleware
     }
 };
-
-
-
-
 
 // Assign a shipment to company 
 const assignShipmentToCompany = async (req, res, next) => {
@@ -430,11 +422,7 @@ const assignShipmentToCompany = async (req, res, next) => {
     }
 };
 
-
-
-
 // Insert API for Truck Types
-
 const createTruckType = async (req, res, next) => {
     const { name, description, } = req.body;
     try {
@@ -449,9 +437,6 @@ const createTruckType = async (req, res, next) => {
         next(error);
     }
 };
-
-
-
 
 
 const getAllTruckTypes = async (req, res, next) => {
@@ -470,10 +455,6 @@ const getAllTruckTypes = async (req, res, next) => {
         next(error); // Pass the error to the error-handling middleware
     }
 };
-
-
-
-
 
 const assignDockNumber = async (req, res, next) => {
     const { shipmentId, dock_number } = req.body; // Shipment ID and dock_number passed in the request body
@@ -541,10 +522,6 @@ const assignDockNumber = async (req, res, next) => {
     }
 };
 
-
-// Loaded
-
-
 const shipmentLoaded = async (req, res, next) => {
     const { shipmentId } = req.params; // Shipment ID passed as a URL parameter
 
@@ -569,7 +546,6 @@ const shipmentLoaded = async (req, res, next) => {
     }
 };
 
-
 const getInTruck = async (req, res, next) => {
     const { shipmentId } = req.params; // Shipment ID passed as a URL parameter
 
@@ -593,13 +569,6 @@ const getInTruck = async (req, res, next) => {
         next(error); // Pass the error to the next middleware
     }
 };
-
-
-
-
-
-
-
 
 module.exports = {
     createShipment, createTruckType, getShipmentDetails,
