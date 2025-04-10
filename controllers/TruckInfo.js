@@ -1,6 +1,6 @@
 const TruckDetails = require("../models/truckDetail");
 const Shipments = require("../models/shipment")
-
+// Add truck Details
 const AddTruckDetails = async (req, res, next) => {
     try {
         const { driver_name, mobile_number, truck_number, shipmentId, created_by , arrival_date} = req.body;
