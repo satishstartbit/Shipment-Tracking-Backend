@@ -7,6 +7,8 @@ const nodemailer = require('nodemailer');
 const Counter = require("../models/shipmentCounter")
 const Notifications = require("../utils/PushNotifications")
 
+const jwt = require('jsonwebtoken');
+const JWT_SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
 
 const ShipmentNumber = async (req, res, next) => {
     const { userid } = req.body;
@@ -80,10 +82,15 @@ const createShipment = async (req, res, next) => {
 //Get Shipment Details
 const getShipmentDetails = async (req, res, next) => {
     const { id } = req.params; // Assuming the shipment ID is passed in the URL
+    const token = req.header('authorization')?.replace('Bearer ', ''); // Extract token from Authorization header
+    const decoded = jwt.verify(token, JWT_SECRET_KEY); // Verify token
+
+
+    const TransportCompanyinfo = await TransportCompany.find({ munshiId: decoded?.userId })
 
     try {
         // Find the shipment by ID and populate related fields
-        const shipment = await Shipments.findById(id)
+        let shipment = await Shipments.findById(id)
             .populate("companyId", "") // Populating the Plant with name and location
             .populate("truckTypeId", "") // Populating the TruckType with type and capacity
             .populate('TruckId', '')  // Populate the truck type data
@@ -95,8 +102,21 @@ const getShipmentDetails = async (req, res, next) => {
         }
 
 
-        // Return the populated shipment details
-        res.status(200).json({ shipment });
+        if ((TransportCompanyinfo ?? [])?.length > 0) {
+            if (TransportCompanyinfo[0]._id.toString() == shipment?.companyId._id?.toString()) {
+                // Return the populated shipment details
+                res.status(200).json({ shipment, sucess: true });
+            } else {
+                // Return the populated shipment details
+                console.log("TransportCompanyinfo", TransportCompanyinfo);
+
+                res.status(200).json({ shipment, sucess: false, massage: "This shipment is assigned to a different transport company." });
+            }
+
+        } else {
+            res.status(200).json({ shipment });
+        }
+
     } catch (error) {
         next(error); // Pass the error to the error-handling middleware
     }
@@ -496,7 +516,11 @@ const assignDockNumber = async (req, res, next) => {
                     return Notifications(item?.token,
                         "Assigned Dock Number",
                         `Dock number ${shipment?.dock_number} has been assigned to this shipment. Please contact your truck driver for further details. Shipment No: ${shipment?.shipment_number} Status: ${shipment?.shipment_status}.`,
-                        { someData: 'example' }
+                        {
+                            "screen": "assignTruck",
+                            "shipmentId": shipmentId
+                        }
+
                     )
                 }
             })

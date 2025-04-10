@@ -22,7 +22,7 @@ router.post('/assignshipment', assignShipmentToCompany);
 router.post('/createtruck', AddTruckDetails);
 
 router.post('/assigndocknumber', assignDockNumber);
-router.get('/getintruck/:shipmentId', getInTruck);
+router.get('/getintruck/:shipmentId/', getInTruck);
 
 
 router.post('/createshipmentnumber', ShipmentNumber);
