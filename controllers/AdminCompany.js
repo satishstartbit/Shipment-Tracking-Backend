@@ -1,7 +1,7 @@
 
 const Users = require('../models/user');
 const TransportCompany = require('../models/transportCompany');
-
+//Transport Company Registration API
 const registerTransportCompany = async (req, res, next) => {
 
     const { company_name, city, state, country, company_contact,
