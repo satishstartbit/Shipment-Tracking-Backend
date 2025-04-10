@@ -6,7 +6,6 @@ const JWT_SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
 // Middleware function to verify JWT token
 const verifyToken = (req, res, next) => {
     const token = req.header('authorization')?.replace('Bearer ', ''); // Extract token from Authorization header
-    console.log("token", req.header("Authorization"));
 
 
     if (!token) {

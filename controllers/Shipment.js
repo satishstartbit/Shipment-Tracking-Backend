@@ -7,6 +7,8 @@ const nodemailer = require('nodemailer');
 const Counter = require("../models/shipmentCounter")
 const Notifications = require("../utils/PushNotifications")
 
+const jwt = require('jsonwebtoken');
+const JWT_SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
 
 const ShipmentNumber = async (req, res, next) => {
     const { userid } = req.body;
@@ -39,8 +41,6 @@ const ShipmentNumber = async (req, res, next) => {
         next(error);
     }
 };
-
-
 
 const createShipment = async (req, res, next) => {
     const { shipment_id, truckTypeId, destination_pin_code, destination_city,
@@ -80,10 +80,15 @@ const createShipment = async (req, res, next) => {
 //Get Shipment Details
 const getShipmentDetails = async (req, res, next) => {
     const { id } = req.params; // Assuming the shipment ID is passed in the URL
+    const token = req.header('authorization')?.replace('Bearer ', ''); // Extract token from Authorization header
+    const decoded = jwt.verify(token, JWT_SECRET_KEY); // Verify token
+
+
+    const TransportCompanyinfo = await TransportCompany.find({ munshiId: decoded?.userId })
 
     try {
         // Find the shipment by ID and populate related fields
-        const shipment = await Shipments.findById(id)
+        let shipment = await Shipments.findById(id)
             .populate("companyId", "") // Populating the Plant with name and location
             .populate("truckTypeId", "") // Populating the TruckType with type and capacity
             .populate('TruckId', '')  // Populate the truck type data
@@ -95,14 +100,25 @@ const getShipmentDetails = async (req, res, next) => {
         }
 
 
-        // Return the populated shipment details
-        res.status(200).json({ shipment });
+        if ((TransportCompanyinfo ?? [])?.length > 0) {
+            if (TransportCompanyinfo[0]._id.toString() == shipment?.companyId._id?.toString()) {
+                // Return the populated shipment details
+                res.status(200).json({ shipment, sucess: true });
+            } else {
+                // Return the populated shipment details
+                console.log("TransportCompanyinfo", TransportCompanyinfo);
+
+                res.status(200).json({ shipment, sucess: false, massage: "This shipment is Reassigned to a different transport company." });
+            }
+
+        } else {
+            res.status(200).json({ shipment });
+        }
+
     } catch (error) {
         next(error); // Pass the error to the error-handling middleware
     }
 };
-
-
 
 // Get all shipments
 const getAllShipments = async (req, res, next) => {
@@ -115,6 +131,7 @@ const getAllShipments = async (req, res, next) => {
         const skip = (page_no - 1) * page_size;  // For skipping records based on page number
         const limit = parseInt(page_size); // Number of records to fetch
         const sortOrder = order === 'desc' ? -1 : 1;  // Sort order (ascending or descending)
+        console.log("test");
 
 
         // Build the search filter
@@ -137,10 +154,10 @@ const getAllShipments = async (req, res, next) => {
         // Modify filters based on the slug
         if (slug === 'security_gaurd') {
             // Add an additional filter for the 'Confirmed' status if the role is 'security_gaurd'
-            filters = { ...filters, shipment_status: ['Confirmed', "GateIn", "Loaded"] };
+            filters = { ...filters, shipment_status: ['Confirmed', "GateIn", "Loading", "Loaded"] };
         } else if (slug === "Munshi") {
             filters = {
-                ...filters, shipment_status: ['Assigned', 'Confirmed', "GateIn", "Loaded"]
+                ...filters, shipment_status: ['Assigned', 'Confirmed', "GateIn", "Loading", "Loaded"]
             };
             filters.companyId = new mongoose.Types.ObjectId(companyid);  // Convert the companyId to ObjectId type
         }
@@ -222,14 +239,10 @@ const getAllShipments = async (req, res, next) => {
     }
 };
 
-
-
-
-
 // Assign a shipment to company 
 const assignShipmentToCompany = async (req, res, next) => {
-    const { shipmentId, companyId, mobile_number } = req.body; // shipmentId and companyId passed in the request body
-
+    const { shipmentId, companyId, mobile_number, updated_at } = req.body; // shipmentId and companyId passed in the request body
+    console.log("updated_atupdated_at", updated_at);
 
     const transporter = nodemailer.createTransport({
         service: 'gmail',
@@ -265,7 +278,7 @@ const assignShipmentToCompany = async (req, res, next) => {
         shipment.companyId = companyId;
         shipment.mobile_number = mobile_number;
         shipment.shipment_status = "Assigned"
-
+        shipment.updated_at = updated_at
 
         const user = await Users.findById(shipment.createdBy)
         const munshiuser = await Users.findById(company.munshiId)
@@ -273,10 +286,17 @@ const assignShipmentToCompany = async (req, res, next) => {
 
         if ((munshiuser?.push_notifications ?? [])?.length > 0) {
             await (munshiuser?.push_notifications ?? [])?.map((item) => {
-                return Notifications(item?.token,
-                    "New Shipment Assigned to Your Company",
-                    `A new shipment has been assigned to ${company?.company_name}. Please provide truck details. Shipment No: ${shipment?.shipment_number}, Status: ${shipment?.shipment_status}.`
-                )
+                if (item?.islogin) {
+                    return Notifications(item?.token,
+                        "New Shipment Assigned to Your Company",
+                        `A new shipment has been assigned to ${company?.company_name}. Please provide truck details. Shipment No: ${shipment?.shipment_number}, Status: ${shipment?.shipment_status}.`,
+                        {
+                            "screen": "assignTruck",
+                            "shipmentId": shipmentId
+                        }
+
+                    )
+                }
             })
         }
 
@@ -402,11 +422,7 @@ const assignShipmentToCompany = async (req, res, next) => {
     }
 };
 
-
-
-
 // Insert API for Truck Types
-
 const createTruckType = async (req, res, next) => {
     const { name, description, } = req.body;
     try {
@@ -421,9 +437,6 @@ const createTruckType = async (req, res, next) => {
         next(error);
     }
 };
-
-
-
 
 
 const getAllTruckTypes = async (req, res, next) => {
@@ -442,10 +455,6 @@ const getAllTruckTypes = async (req, res, next) => {
         next(error); // Pass the error to the error-handling middleware
     }
 };
-
-
-
-
 
 const assignDockNumber = async (req, res, next) => {
     const { shipmentId, dock_number } = req.body; // Shipment ID and dock_number passed in the request body
@@ -473,7 +482,7 @@ const assignDockNumber = async (req, res, next) => {
 
         // Step 3: Assign the dock number and update shipment status
         shipment.dock_number = dock_number;
-        shipment.shipment_status = 'Loaded';
+        shipment.shipment_status = 'Loading';
 
 
         // Find the company by its ID (assuming you have a Company model)
@@ -484,12 +493,17 @@ const assignDockNumber = async (req, res, next) => {
 
         if ((munshiuser?.push_notifications ?? [])?.length > 0) {
             await (munshiuser?.push_notifications ?? [])?.map((item) => {
-                return Notifications(item?.token,
-                    "Assigned Dock Number",
-                    `Dock number ${shipment?.dock_number} has been assigned to this shipment. Please contact your truck driver for further details.
-                     Shipment No: ${shipment?.shipment_number}
-                     Status: ${shipment?.shipment_status}.`
-                )
+                if (item?.islogin) {
+                    return Notifications(item?.token,
+                        "Assigned Dock Number",
+                        `Dock number ${shipment?.dock_number} has been assigned to this shipment. Please contact your truck driver for further details. Shipment No: ${shipment?.shipment_number} Status: ${shipment?.shipment_status}.`,
+                        {
+                            "screen": "assignTruck",
+                            "shipmentId": shipmentId
+                        }
+
+                    )
+                }
             })
         }
 
@@ -508,9 +522,29 @@ const assignDockNumber = async (req, res, next) => {
     }
 };
 
+const shipmentLoaded = async (req, res, next) => {
+    const { shipmentId } = req.params; // Shipment ID passed as a URL parameter
+
+    try {
+        // Step 1: Fetch the existing shipment by shipmentId
+        const shipment = await Shipments.findById(shipmentId);
+
+        if (!shipment) {
+            return res.status(404).json({ message: 'Shipment not found' });
+        }
 
 
+        shipment.shipment_status = 'Loaded';
 
+
+        const updatedShipment = await shipment.save();
+
+        // Step 6: Return the updated shipment
+        res.status(200).json({ shipment: updatedShipment });
+    } catch (error) {
+        next(error); // Pass the error to the next middleware
+    }
+};
 
 const getInTruck = async (req, res, next) => {
     const { shipmentId } = req.params; // Shipment ID passed as a URL parameter
@@ -536,15 +570,8 @@ const getInTruck = async (req, res, next) => {
     }
 };
 
-
-
-
-
-
-
-
 module.exports = {
     createShipment, createTruckType, getShipmentDetails,
     getAllShipments, getAllTruckTypes, assignShipmentToCompany,
-    assignDockNumber, getInTruck, ShipmentNumber
+    assignDockNumber, getInTruck, ShipmentNumber, shipmentLoaded
 };

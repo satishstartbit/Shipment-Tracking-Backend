@@ -1,12 +1,9 @@
 // Core modules and third-party packages
-
-const path = require("path");
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const cors = require("cors")
 require("dotenv").config();
-
 
 
 // Importing route modules
@@ -21,14 +18,13 @@ const verifyToken = require('./utils/VerifyToken'); // Import the verifyToken mi
 // Initialize the Express app
 const app = express();
 
-
 // Middleware setup
 app.use(bodyParser.urlencoded({ extended: false })); // Parse URL-encoded payloads
 app.use(bodyParser.json()); // Parse JSON payloads
 
 // Enable CORS for all origins
 app.use(cors({
-    origin:"*"
+    origin: "*"
 }))
 
 const PORT = process.env.PORT || 3000;
@@ -46,11 +42,11 @@ app.use((req, res, next) => {
 });
 
 // API route definitions
-app.use("/api/role",verifyToken, roleRoutes);
+app.use("/api/role", verifyToken, roleRoutes);
 app.use("/api/users", userRoutes);
-app.use("/api/company",verifyToken, companyRoutes);
+app.use("/api/company", verifyToken, companyRoutes);
 app.use("/mobile", MobileRoutes)
-app.use("/shipment",verifyToken, ShipmentRoutes)
+app.use("/shipment", verifyToken, ShipmentRoutes)
 
 app.get('/', (req, res) => {
     res.send('Hello, World!');
@@ -77,7 +73,7 @@ mongoose
         console.error("❌ Failed to connect to MongoDB", err);
         process.exit(1);
     });
-    
+
 // Start the server
 app.listen(PORT, () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`);
