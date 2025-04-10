@@ -501,7 +501,7 @@ const assignDockNumber = async (req, res, next) => {
 
         // Step 3: Assign the dock number and update shipment status
         shipment.dock_number = dock_number;
-        shipment.shipment_status = 'Loaded';
+        shipment.shipment_status = 'Loading';
 
 
         // Find the company by its ID (assuming you have a Company model)
@@ -542,7 +542,32 @@ const assignDockNumber = async (req, res, next) => {
 };
 
 
+// Loaded
 
+
+const shipmentLoaded = async (req, res, next) => {
+    const { shipmentId } = req.params; // Shipment ID passed as a URL parameter
+
+    try {
+        // Step 1: Fetch the existing shipment by shipmentId
+        const shipment = await Shipments.findById(shipmentId);
+
+        if (!shipment) {
+            return res.status(404).json({ message: 'Shipment not found' });
+        }
+
+
+        shipment.shipment_status = 'Loaded';
+
+
+        const updatedShipment = await shipment.save();
+
+        // Step 6: Return the updated shipment
+        res.status(200).json({ shipment: updatedShipment });
+    } catch (error) {
+        next(error); // Pass the error to the next middleware
+    }
+};
 
 
 const getInTruck = async (req, res, next) => {
@@ -579,5 +604,5 @@ const getInTruck = async (req, res, next) => {
 module.exports = {
     createShipment, createTruckType, getShipmentDetails,
     getAllShipments, getAllTruckTypes, assignShipmentToCompany,
-    assignDockNumber, getInTruck, ShipmentNumber
+    assignDockNumber, getInTruck, ShipmentNumber , shipmentLoaded
 };
