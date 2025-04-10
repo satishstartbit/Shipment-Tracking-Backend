@@ -29,40 +29,41 @@ const UserLogin = async (req, res, next) => {
 
 
 
-        // Check and update push_notifications if mobile_id and token are provided
-        if ( push_notification_token) {
-
-
-            // Check if mobile_id already exists in push_notifications array
-            const existingNotification = user.push_notifications.find(
+        // Check and update push_notifications if token is provided
+        if (push_notification_token) {
+            const updatePushNotifications = user.push_notifications.some(
                 (notif) => notif.token === push_notification_token
             );
 
-
-            console.log("existingNotification", existingNotification, push_notification_token);
-
-            if (existingNotification) {
-                // If the token is different, update the token and other details
-                if (existingNotification.token !== push_notification_token) {
-                    existingNotification.token = push_notification_token;
-                    existingNotification.created_at = Date.now();
-                    existingNotification.islogin = true
-                }
+            if (updatePushNotifications) {
+                // If the token exists, update its status and timestamp
+                await Users.updateOne(
+                    { _id: user._id, 'push_notifications.token': push_notification_token },
+                    {
+                        $set: {
+                            'push_notifications.$.islogin': true,
+                            'push_notifications.$.created_at': Date.now(),
+                        },
+                    }
+                );
             } else {
-                // If no notification exists with this mobile_id, add a new entry
-                user.push_notifications.push({
-                    mobile_id:deviceInfo?.deviceId ,
-                    token: push_notification_token,
-                    device: deviceInfo.deviceType || "android",  // Assuming deviceType is provided
-                    created_at: Date.now(),
-                    islogin: true
-                });
+                // If no token found, create new push notification entry
+                await Users.updateOne(
+                    { _id: user._id },
+                    {
+                        $push: {
+                            push_notifications: {
+                                mobile_id: deviceInfo?.deviceId,
+                                token: push_notification_token,
+                                device: deviceInfo.deviceType || 'android',
+                                created_at: Date.now(),
+                                islogin: true,
+                            },
+                        },
+                    }
+                );
             }
-
-            // Save the user with updated push_notifications
-            await user.save();
         }
-
 
         // Generate JWT token (expires in 60 days)
         const accessToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRATION });
