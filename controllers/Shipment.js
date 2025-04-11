@@ -234,16 +234,13 @@ const getAllShipments = async (req, res, next) => {
         }
 
 
-        // If no shipments are found, return a 404 response
-        if (shipments.length === 0) {
-            return res.status(404).json({ message: 'No shipments found' });
-        }
+
 
         // Return the populated shipment details with pagination information
         res.status(200).json({
-            shipments,
+            shipments ,
             totalShipments,
-            page_size: parseInt(page_size),
+            page_size: parseInt(page_size) ?? 0,
             page_no: parseInt(page_no),
             total_pages: Math.ceil(totalShipments / page_size),  // Calculate total pages
             has_next: (page_no * page_size) < totalShipments,  // Check if there is a next page
