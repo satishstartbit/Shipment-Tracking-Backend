@@ -125,6 +125,7 @@ const getAllUsers = async (req, res, next) => {
                 { 'first_name': { $regex: search, $options: 'i' } },
                 { 'last_name': { $regex: search, $options: 'i' } },
                 { 'mobile_no': { $regex: search, $options: 'i' } },
+                { 'roleDetails.name': { $regex: search, $options: 'i' } },
             ]
         }
         : {};
