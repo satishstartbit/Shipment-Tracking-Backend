@@ -184,6 +184,7 @@ const getAllTransportCompany = async (req, res, next) => {
     const matchStage = searchRegex ? {
         $or: [
             { "company_name": { $regex: searchRegex } },
+            { 'munshi.username': { $regex: searchRegex } },
             { 'munshi.email': { $regex: searchRegex } },
             { 'munshi.first_name': { $regex: searchRegex } },
             { 'munshi.last_name': { $regex: searchRegex } },
