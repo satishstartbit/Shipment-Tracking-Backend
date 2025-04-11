@@ -114,20 +114,20 @@ const getAllUsers = async (req, res, next) => {
     const pageNo = parseInt(page_no) || 1; // Default to 1 if page_no is not provided
     const sortOrder = order === 'desc' ? -1 : 1; // Sort order (asc or desc)
 
-    
+
     // Initialize the search query object
     let searchQuery = {};
     const searchFilter = search
-    ? {
-        $or: [
-            { 'username': { $regex: search, $options: 'i' } }, 
-            { 'email': { $regex: search, $options: 'i' } }, 
-            { 'first_name': { $regex: search, $options: 'i' } }, 
-            { 'last_name': { $regex: search, $options: 'i' } }, 
-            { 'mobile_no': { $regex: search, $options: 'i' } },  
-        ]
-    }
-    : {}; 
+        ? {
+            $or: [
+                { 'username': { $regex: search, $options: 'i' } },
+                { 'email': { $regex: search, $options: 'i' } },
+                { 'first_name': { $regex: search, $options: 'i' } },
+                { 'last_name': { $regex: search, $options: 'i' } },
+                { 'mobile_no': { $regex: search, $options: 'i' } },
+            ]
+        }
+        : {};
     try {
         // Calculate pagination parameters
         const skip = (pageNo - 1) * pageSize;
