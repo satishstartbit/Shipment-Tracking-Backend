@@ -125,13 +125,20 @@ const getAllShipments = async (req, res, next) => {
 
     try {
         // Destructure query parameters from the request
-        const { page_size = 10, page_no = 1, search = '', order = 'asc', slug = 'logistic_person', companyid = null } = req.body;
+        const { page_size = 10,
+            page_no = 1,
+            search = '',
+            order = 'asc',
+            slug = 'logistic_person',
+            companyid = null,
+            shipment_status= null
+
+        } = req.body;
 
         // Create the pagination and ordering logic
         const skip = (page_no - 1) * page_size;  // For skipping records based on page number
         const limit = parseInt(page_size); // Number of records to fetch
         const sortOrder = order === 'desc' ? -1 : 1;  // Sort order (ascending or descending)
-        console.log("test");
 
 
         // Build the search filter
@@ -160,7 +167,15 @@ const getAllShipments = async (req, res, next) => {
                 ...filters, shipment_status: ['Assigned', 'Confirmed', "GateIn", "Loading", "Loaded"]
             };
             filters.companyId = new mongoose.Types.ObjectId(companyid);  // Convert the companyId to ObjectId type
+        }else{
+            if(shipment_status){
+                filters = { ...filters, shipment_status: shipment_status };
+            }
         }
+
+
+        
+
 
         let shipments = []
         let totalShipments = 0
