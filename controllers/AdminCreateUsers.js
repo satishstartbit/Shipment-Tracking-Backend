@@ -137,7 +137,7 @@ const getAllUsers = async (req, res, next) => {
         const users = await Users.aggregate([
             // Stage 1: Match search query if provided
             {
-                $match: searchQuery
+                $match: searchFilter
             },
             // Stage 2: Lookup role details
             {
@@ -173,7 +173,7 @@ const getAllUsers = async (req, res, next) => {
 
         // Count the total number of users matching the search criteria
         const totalCount = await Users.aggregate([
-            { $match: searchQuery }, // Apply the search query filter
+            { $match: searchFilter }, // Apply the search query filter
             {
                 $lookup: {
                     from: 'roles', // Lookup roles
