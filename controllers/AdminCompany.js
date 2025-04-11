@@ -173,35 +173,70 @@ const getTransportCompanyById = async (req, res, next) => {
 const getAllTransportCompany = async (req, res, next) => {
     const { page_size, page_no, search, order } = req.query;
 
-    const pageSize = parseInt(page_size) || 10; // Default to 10 if page_size is not provided
-    const pageNo = parseInt(page_no) || 1; // Default to 1 if page_no is not provided
-    const searchQuery = search ? { $text: { $search: search } } : {}; // Search filter
-    const sortOrder = order === 'desc' ? -1 : 1; // Sort order (asc or desc)
+    const pageSize = parseInt(page_size) || 10;
+    const pageNo = parseInt(page_no) || 1;
+    const skip = (pageNo - 1) * pageSize;
+    const sortOrder = order === 'desc' ? -1 : 1;
+
+    // Create regex search filters
+    const searchRegex = search ? new RegExp(search, 'i') : null;
+
+    const matchStage = searchRegex ? {
+        $or: [
+            { "company_name": { $regex: searchRegex } },
+            { 'munshi.email': { $regex: searchRegex } },
+            { 'munshi.first_name': { $regex: searchRegex } },
+            { 'munshi.last_name': { $regex: searchRegex } },
+            { 'munshi.mobile_no': { $regex: searchRegex } },
+        ]
+    } : {};
 
     try {
-        // Calculate the skip and limit based on page size and page number
-        const skip = (pageNo - 1) * pageSize;
-        const limit = pageSize;
+        const aggregatePipeline = [
+            {
+                $lookup: {
+                    from: 'users', // Assuming munshiId refers to the "users" collection
+                    localField: 'munshiId',
+                    foreignField: '_id',
+                    as: 'munshi'
+                }
+            },
+            { $unwind: '$munshi' },
+            { $match: matchStage },
+            { $sort: { createdAt: sortOrder } },
+            { $skip: skip },
+            { $limit: pageSize },
+        ];
 
-        // Fetch the users with pagination and search filter
-        const Company = await TransportCompany.find(searchQuery).populate("munshiId")
-            .sort({ createdAt: sortOrder }) // Assuming sorting by `createdAt`, adjust as needed
-            .skip(skip)
-            .limit(limit);
+        const CompanyListing = await TransportCompany.aggregate(aggregatePipeline);
 
+        // Count total matching documents
+        const countPipeline = [
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'munshiId',
+                    foreignField: '_id',
+                    as: 'munshi'
+                }
+            },
+            { $unwind: '$munshi' },
+            { $match: matchStage },
+            { $count: 'total' }
+        ];
 
-        // Get the total Company count (for pagination purposes)
-        const totalCompanyCount = await TransportCompany.countDocuments(searchQuery);
+        const countResult = await TransportCompany.aggregate(countPipeline);
+        const totalCompanyCount = countResult[0]?.total || 0;
 
-        // Respond with Company users and total count
         res.status(200).json({
             totalCompanyCount,
-            CompanyListing: Company,
+            CompanyListing
         });
     } catch (error) {
-        next(error); // Handle error if fetching users fails
+        next(error);
     }
 };
+
 
 
 // Controller to delete user by ID
