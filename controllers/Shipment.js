@@ -9,7 +9,7 @@ const Notifications = require("../utils/PushNotifications")
 
 const jwt = require('jsonwebtoken');
 const JWT_SECRET_KEY = process.env.JWT_SECRET || 'your_secret_key';
-
+//Controller to Create Shipments
 const ShipmentNumber = async (req, res, next) => {
     const { userid } = req.body;
 

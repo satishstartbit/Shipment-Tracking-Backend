@@ -37,6 +37,7 @@ const loginUser = async (req, res) => {
   }
 };
 
+
 // Controller to refresh the access token using the refresh token
 const refreshAccessToken = async (req, res) => {
   const { refreshToken } = req.body;
